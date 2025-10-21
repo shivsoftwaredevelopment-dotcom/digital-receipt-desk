@@ -15,6 +15,7 @@ interface Receipt {
   id: string;
   customer_name: string;
   mobile_number: string;
+  branch: string;
   receipt_date: string;
   items: ReceiptItem[];
   subtotal: number;
@@ -85,10 +86,15 @@ const ReceiptDisplay = () => {
     <div className="min-h-screen bg-background p-4 md:p-8">
       <div className="mx-auto max-w-4xl">
         <div className="mb-6 flex flex-wrap items-center justify-between gap-4 print:hidden">
-          <Button variant="outline" onClick={() => navigate("/")}>
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            New Receipt
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={() => navigate("/")}>
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              New Receipt
+            </Button>
+            <Button variant="outline" onClick={() => navigate("/history")}>
+              History
+            </Button>
+          </div>
           <div className="flex gap-2">
             <Button onClick={handlePrint}>
               <Printer className="mr-2 h-4 w-4" />
@@ -109,8 +115,9 @@ const ReceiptDisplay = () => {
                 <h1 className="mb-2 text-3xl font-bold text-primary">TAX INVOICE</h1>
                 <div className="text-sm text-muted-foreground">
                   <p className="font-semibold">Shiv Dental Clinic</p>
-                  <p>Bhilai Nagar, Durg</p>
-                  <p>Phone: 9617584304</p>
+                  <p className="font-medium">{receipt.branch}</p>
+                  <p>Email: rkprasad0306@gmail.com</p>
+                  <p>Phone: 9973479904</p>
                 </div>
               </div>
               <div className="text-right">

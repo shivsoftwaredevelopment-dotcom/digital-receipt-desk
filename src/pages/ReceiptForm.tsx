@@ -6,8 +6,15 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
-import { Plus, Trash2, LogOut, FileText } from "lucide-react";
+import { Plus, Trash2, LogOut, FileText, History, User } from "lucide-react";
 import { z } from "zod";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const itemSchema = z.object({
   name: z.string().trim().min(1, "Item name required").max(100),
@@ -18,6 +25,7 @@ const itemSchema = z.object({
 const receiptSchema = z.object({
   customerName: z.string().trim().min(1, "Name required").max(100),
   mobileNumber: z.string().trim().regex(/^[0-9]{10}$/, "Enter valid 10-digit mobile"),
+  branch: z.string().min(1, "Branch required"),
   date: z.string().min(1, "Date required"),
   items: z.array(itemSchema).min(1, "Add at least one item"),
   taxRate: z.number().min(0).max(100),
@@ -34,6 +42,7 @@ const ReceiptForm = () => {
   const navigate = useNavigate();
   const [customerName, setCustomerName] = useState("");
   const [mobileNumber, setMobileNumber] = useState("");
+  const [branch, setBranch] = useState("Near Shivaji Chowk Banka");
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
   const [items, setItems] = useState<Item[]>([
     { id: "1", name: "", quantity: 1, price: 0 },
@@ -78,6 +87,7 @@ const ReceiptForm = () => {
       const validated = receiptSchema.parse({
         customerName,
         mobileNumber,
+        branch,
         date,
         items: items.map(({ id, ...item }) => item),
         taxRate,
@@ -101,6 +111,7 @@ const ReceiptForm = () => {
           user_id: user.id,
           customer_name: validated.customerName,
           mobile_number: validated.mobileNumber,
+          branch: validated.branch,
           receipt_date: validated.date,
           items: validated.items,
           subtotal: calculateSubtotal(),
@@ -133,7 +144,7 @@ const ReceiptForm = () => {
   return (
     <div className="min-h-screen bg-background p-4 md:p-8">
       <div className="mx-auto max-w-4xl">
-        <div className="mb-6 flex items-center justify-between">
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-primary-foreground">
               <FileText className="h-6 w-6" />
@@ -143,10 +154,20 @@ const ReceiptForm = () => {
               <p className="text-sm text-muted-foreground">Fill in the details below</p>
             </div>
           </div>
-          <Button variant="outline" onClick={handleSignOut}>
-            <LogOut className="mr-2 h-4 w-4" />
-            Sign Out
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={() => navigate("/history")}>
+              <History className="mr-2 h-4 w-4" />
+              History
+            </Button>
+            <Button variant="outline" onClick={() => navigate("/profile")}>
+              <User className="mr-2 h-4 w-4" />
+              Profile
+            </Button>
+            <Button variant="outline" onClick={handleSignOut}>
+              <LogOut className="mr-2 h-4 w-4" />
+              Sign Out
+            </Button>
+          </div>
         </div>
 
         <form onSubmit={handleSubmit}>
@@ -181,15 +202,33 @@ const ReceiptForm = () => {
                   />
                 </div>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="date">Receipt Date *</Label>
-                <Input
-                  id="date"
-                  type="date"
-                  value={date}
-                  onChange={(e) => setDate(e.target.value)}
-                  required
-                />
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="branch">Branch *</Label>
+                  <Select value={branch} onValueChange={setBranch}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select branch" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Near Shivaji Chowk Banka">
+                        Near Shivaji Chowk Banka
+                      </SelectItem>
+                      <SelectItem value="Nimiya Belhar Banka">
+                        Nimiya Belhar Banka
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="date">Receipt Date *</Label>
+                  <Input
+                    id="date"
+                    type="date"
+                    value={date}
+                    onChange={(e) => setDate(e.target.value)}
+                    required
+                  />
+                </div>
               </div>
             </CardContent>
           </Card>

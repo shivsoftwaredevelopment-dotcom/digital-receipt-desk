@@ -16,6 +16,7 @@ export type Database = {
     Tables: {
       receipts: {
         Row: {
+          branch: string
           created_at: string | null
           customer_name: string
           id: string
@@ -29,6 +30,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          branch?: string
           created_at?: string | null
           customer_name: string
           id?: string
@@ -42,6 +44,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          branch?: string
           created_at?: string | null
           customer_name?: string
           id?: string

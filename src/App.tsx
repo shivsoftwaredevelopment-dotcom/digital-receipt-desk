@@ -6,6 +6,8 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Auth from "./pages/Auth";
 import ReceiptForm from "./pages/ReceiptForm";
 import ReceiptDisplay from "./pages/ReceiptDisplay";
+import ReceiptHistory from "./pages/ReceiptHistory";
+import Profile from "./pages/Profile";
 import ProtectedRoute from "./components/ProtectedRoute";
 import NotFound from "./pages/NotFound";
 
@@ -32,6 +34,22 @@ const App = () => (
             element={
               <ProtectedRoute>
                 <ReceiptDisplay />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/history"
+            element={
+              <ProtectedRoute>
+                <ReceiptHistory />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <Profile />
               </ProtectedRoute>
             }
           />
