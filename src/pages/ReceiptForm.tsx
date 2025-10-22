@@ -25,6 +25,7 @@ const itemSchema = z.object({
 const receiptSchema = z.object({
   customerName: z.string().trim().min(1, "Name required").max(100),
   mobileNumber: z.string().trim().regex(/^[0-9]{10}$/, "Enter valid 10-digit mobile"),
+  address: z.string().trim().min(1, "Address required").max(200),
   branch: z.string().min(1, "Branch required"),
   date: z.string().min(1, "Date required"),
   items: z.array(itemSchema).min(1, "Add at least one item"),
@@ -42,6 +43,7 @@ const ReceiptForm = () => {
   const navigate = useNavigate();
   const [customerName, setCustomerName] = useState("");
   const [mobileNumber, setMobileNumber] = useState("");
+  const [address, setAddress] = useState("");
   const [branch, setBranch] = useState("Near Shivaji Chowk Banka");
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
   const [items, setItems] = useState<Item[]>([
@@ -87,6 +89,7 @@ const ReceiptForm = () => {
       const validated = receiptSchema.parse({
         customerName,
         mobileNumber,
+        address,
         branch,
         date,
         items: items.map(({ id, ...item }) => item),
@@ -111,6 +114,7 @@ const ReceiptForm = () => {
           user_id: user.id,
           customer_name: validated.customerName,
           mobile_number: validated.mobileNumber,
+          address: validated.address,
           branch: validated.branch,
           receipt_date: validated.date,
           items: validated.items,
@@ -201,6 +205,17 @@ const ReceiptForm = () => {
                     required
                   />
                 </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="address">Address *</Label>
+                <Input
+                  id="address"
+                  value={address}
+                  onChange={(e) => setAddress(e.target.value)}
+                  placeholder="Enter customer address"
+                  maxLength={200}
+                  required
+                />
               </div>
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
