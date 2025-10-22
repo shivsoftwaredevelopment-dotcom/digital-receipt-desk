@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Auth from "./pages/Auth";
+import Dashboard from "./pages/Dashboard";
 import ReceiptForm from "./pages/ReceiptForm";
 import ReceiptDisplay from "./pages/ReceiptDisplay";
 import ReceiptHistory from "./pages/ReceiptHistory";
@@ -23,6 +24,14 @@ const App = () => (
           <Route path="/auth" element={<Auth />} />
           <Route
             path="/"
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/receipt-form"
             element={
               <ProtectedRoute>
                 <ReceiptForm />

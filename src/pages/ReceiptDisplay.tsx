@@ -90,6 +90,9 @@ const ReceiptDisplay = () => {
           <div className="flex gap-2">
             <Button variant="outline" onClick={() => navigate("/")}>
               <ArrowLeft className="mr-2 h-4 w-4" />
+              Dashboard
+            </Button>
+            <Button variant="outline" onClick={() => navigate("/receipt-form")}>
               New Receipt
             </Button>
             <Button variant="outline" onClick={() => navigate("/history")}>
@@ -108,53 +111,53 @@ const ReceiptDisplay = () => {
           </div>
         </div>
 
-        <div className="receipt-print mx-auto max-w-2xl rounded-lg border bg-card p-6 shadow-strong">
-          {/* Header - Compact half-page layout */}
-          <div className="mb-6 flex items-start justify-between border-b pb-4">
+        <div className="receipt-print mx-auto max-w-2xl rounded-lg border bg-card p-4 shadow-strong">
+          {/* Header - Minimal spacing */}
+          <div className="mb-3 flex items-start justify-between border-b pb-2">
             <div className="flex-1">
-              <h1 className="mb-1 text-xl font-bold">TAX INVOICE</h1>
-              <p className="text-xs text-muted-foreground">Receipt #{receipt.id.slice(0, 8).toUpperCase()}</p>
+              <h1 className="mb-0.5 text-lg font-bold">TAX INVOICE</h1>
+              <p className="text-xs text-muted-foreground">#{receipt.id.slice(0, 8).toUpperCase()}</p>
             </div>
-            <div className="text-right text-xs">
-              <p className="mb-1 font-bold">Shiv Dental Clinic</p>
+            <div className="text-right text-xs leading-tight">
+              <p className="font-bold">Shiv Dental Clinic</p>
               <p className="font-medium">{receipt.branch}</p>
-              <p>Email: rkprasad0306@gmail.com</p>
-              <p>Phone: 9973479904</p>
+              <p>rkprasad0306@gmail.com</p>
+              <p>9973479904</p>
             </div>
           </div>
 
-          {/* Date and Customer Details - Side by side */}
-          <div className="mb-6 grid grid-cols-2 gap-4 text-sm">
+          {/* Date and Customer Details */}
+          <div className="mb-3 grid grid-cols-2 gap-3 text-xs">
             <div>
-              <p className="mb-2 font-semibold">Date:</p>
+              <p className="mb-1 font-semibold">Date:</p>
               <p>{new Date(receipt.receipt_date).toLocaleDateString()}</p>
             </div>
             <div>
-              <p className="mb-2 font-semibold">Customer Details:</p>
+              <p className="mb-1 font-semibold">Customer:</p>
               <p className="font-medium">{receipt.customer_name}</p>
-              <p className="text-xs">{receipt.mobile_number}</p>
-              <p className="text-xs">{receipt.address}</p>
+              <p>{receipt.mobile_number}</p>
+              <p>{receipt.address}</p>
             </div>
           </div>
 
-          {/* Items Table - Compact */}
-          <div className="mb-6">
-            <table className="w-full border-collapse text-sm">
+          {/* Items Table */}
+          <div className="mb-3">
+            <table className="w-full border-collapse text-xs">
               <thead>
-                <tr className="border-b-2 border-primary">
-                  <th className="py-2 text-left text-xs font-semibold">Item</th>
-                  <th className="py-2 text-center text-xs font-semibold">Qty</th>
-                  <th className="py-2 text-right text-xs font-semibold">Rate</th>
-                  <th className="py-2 text-right text-xs font-semibold">Amount</th>
+                <tr className="border-b border-primary">
+                  <th className="py-1 text-left font-semibold">Item</th>
+                  <th className="py-1 text-center font-semibold">Qty</th>
+                  <th className="py-1 text-right font-semibold">Rate</th>
+                  <th className="py-1 text-right font-semibold">Amount</th>
                 </tr>
               </thead>
               <tbody>
                 {receipt.items.map((item, index) => (
                   <tr key={index} className="border-b">
-                    <td className="py-2">{item.name}</td>
-                    <td className="py-2 text-center">{item.quantity}</td>
-                    <td className="py-2 text-right">₹{item.price.toFixed(2)}</td>
-                    <td className="py-2 text-right font-semibold">
+                    <td className="py-1">{item.name}</td>
+                    <td className="py-1 text-center">{item.quantity}</td>
+                    <td className="py-1 text-right">₹{item.price.toFixed(2)}</td>
+                    <td className="py-1 text-right font-semibold">
                       ₹{(item.quantity * item.price).toFixed(2)}
                     </td>
                   </tr>
@@ -163,9 +166,9 @@ const ReceiptDisplay = () => {
             </table>
           </div>
 
-          {/* Totals - Compact */}
+          {/* Totals */}
           <div className="flex justify-end">
-            <div className="w-64 space-y-2 text-sm">
+            <div className="w-48 space-y-1 text-xs">
               <div className="flex justify-between">
                 <span>Subtotal:</span>
                 <span>₹{receipt.subtotal.toFixed(2)}</span>
@@ -174,15 +177,15 @@ const ReceiptDisplay = () => {
                 <span>Tax:</span>
                 <span>₹{receipt.tax_amount.toFixed(2)}</span>
               </div>
-              <div className="flex justify-between border-t-2 border-primary pt-2 font-bold">
+              <div className="flex justify-between border-t border-primary pt-1 font-bold">
                 <span>Total:</span>
                 <span className="text-primary">₹{receipt.total_amount.toFixed(2)}</span>
               </div>
             </div>
           </div>
 
-          {/* Footer - Compact */}
-          <div className="mt-6 border-t pt-4 text-center text-xs text-muted-foreground">
+          {/* Footer */}
+          <div className="mt-3 border-t pt-2 text-center text-xs text-muted-foreground">
             <p>Thank you for your business!</p>
           </div>
         </div>

@@ -48,6 +48,12 @@ All colors MUST be HSL.
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217 91% 60%;
 
+    --chart-1: 210 90% 48%;
+    --chart-2: 180 65% 55%;
+    --chart-3: 25 95% 58%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
+
     --gradient-primary: linear-gradient(135deg, hsl(210, 90%, 48%), hsl(180, 65%, 55%));
     --shadow-soft: 0 2px 8px -2px hsl(210 90% 48% / 0.1);
     --shadow-medium: 0 4px 16px -4px hsl(210 90% 48% / 0.15);
@@ -92,6 +98,12 @@ All colors MUST be HSL.
     --sidebar-accent-foreground: 240 5% 96%;
     --sidebar-border: 240 4% 16%;
     --sidebar-ring: 217 91% 60%;
+
+    --chart-1: 210 90% 48%;
+    --chart-2: 180 65% 55%;
+    --chart-3: 25 95% 58%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
 
     --gradient-primary: linear-gradient(135deg, hsl(210, 90%, 48%), hsl(180, 65%, 55%));
     --shadow-soft: 0 2px 8px -2px hsl(0 0% 0% / 0.3);
