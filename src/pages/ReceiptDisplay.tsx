@@ -186,7 +186,7 @@ const ReceiptDisplay = () => {
 
           {/* Footer */}
           <div className="mt-3 border-t pt-2 text-center text-xs text-muted-foreground">
-            <p>Thank you for your business!</p>
+            <p>Thank You For Visiting My Clinic shop!</p>
           </div>
         </div>
       </div>
