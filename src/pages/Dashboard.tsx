@@ -105,6 +105,7 @@ const Dashboard = () => {
       <div className="mx-auto max-w-7xl">
         <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
           <h1 className="text-3xl font-bold text-primary">Dashboard</h1>
+           <p className="text-3xl font-bold text-primary">Devlop By- Raunak Kumar</p>
           <div className="flex gap-2">
             <Button onClick={() => navigate("/receipt-form")}>
               <Plus className="mr-2 h-4 w-4" />
