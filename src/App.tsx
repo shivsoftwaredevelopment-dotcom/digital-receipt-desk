@@ -9,6 +9,8 @@ import ReceiptForm from "./pages/ReceiptForm";
 import ReceiptDisplay from "./pages/ReceiptDisplay";
 import ReceiptHistory from "./pages/ReceiptHistory";
 import Profile from "./pages/Profile";
+import Admin from "./pages/Admin";
+import AdminUserReceipts from "./pages/AdminUserReceipts";
 import ProtectedRoute from "./components/ProtectedRoute";
 import NotFound from "./pages/NotFound";
 
@@ -59,6 +61,22 @@ const App = () => (
             element={
               <ProtectedRoute>
                 <Profile />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute>
+                <Admin />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/user/:userId/receipts"
+            element={
+              <ProtectedRoute>
+                <AdminUserReceipts />
               </ProtectedRoute>
             }
           />
