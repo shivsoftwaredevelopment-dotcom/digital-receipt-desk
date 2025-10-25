@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import { Plus, FileText, User, LogOut, TrendingUp } from "lucide-react";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 
 interface Receipt {
@@ -47,8 +47,7 @@ const Dashboard = () => {
 
       const receipts = data as Receipt[];
       const totalIncome = receipts.reduce((sum, r) => sum + Number(r.total_amount), 0);
-      
-      // Branch analysis
+
       const branchMap = new Map<string, { amount: number; count: number }>();
       receipts.forEach(r => {
         const current = branchMap.get(r.branch) || { amount: 0, count: 0 };
@@ -63,7 +62,6 @@ const Dashboard = () => {
         count: data.count
       }));
 
-      // Monthly analysis (last 6 months)
       const monthMap = new Map<string, number>();
       receipts.forEach(r => {
         const date = new Date(r.receipt_date);
@@ -101,11 +99,10 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background p-4 md:p-8">
-      <div className="mx-auto max-w-7xl">
+    <div className="min-h-screen bg-background p-4 md:p-8 flex flex-col">
+      <div className="mx-auto max-w-7xl flex-1">
         <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
           <h1 className="text-3xl font-bold text-primary">Dashboard</h1>
-           <br>Devlop By- Raunak Kumar</br>
           <div className="flex gap-2">
             <Button onClick={() => navigate("/receipt-form")}>
               <Plus className="mr-2 h-4 w-4" />
@@ -161,7 +158,6 @@ const Dashboard = () => {
 
         {/* Charts */}
         <div className="grid gap-6 md:grid-cols-2">
-          {/* Monthly Income Chart */}
           <Card>
             <CardHeader>
               <CardTitle>Monthly Income</CardTitle>
@@ -189,7 +185,6 @@ const Dashboard = () => {
             </CardContent>
           </Card>
 
-          {/* Branch Analysis */}
           <Card>
             <CardHeader>
               <CardTitle>Branch Performance</CardTitle>
@@ -227,8 +222,8 @@ const Dashboard = () => {
                 {stats.branchData.map((branch, index) => (
                   <div key={branch.branch} className="flex items-center justify-between text-sm">
                     <div className="flex items-center gap-2">
-                      <div 
-                        className="h-3 w-3 rounded-full" 
+                      <div
+                        className="h-3 w-3 rounded-full"
                         style={{ backgroundColor: COLORS[index % COLORS.length] }}
                       />
                       <span>{branch.branch}</span>
@@ -241,6 +236,11 @@ const Dashboard = () => {
           </Card>
         </div>
       </div>
+
+      {/* Developer Credit Section */}
+      <footer className="mt-8 text-center text-sm text-gray-500">
+        Developed by <span className="font-semibold text-primary">Raunak Kumar</span>
+      </footer>
     </div>
   );
 };
