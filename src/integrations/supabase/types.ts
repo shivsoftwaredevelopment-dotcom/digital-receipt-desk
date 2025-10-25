@@ -14,6 +14,75 @@ export type Database = {
   }
   public: {
     Tables: {
+      profiles: {
+        Row: {
+          created_at: string | null
+          full_name: string | null
+          id: string
+          phone: string | null
+          profile_image_url: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          full_name?: string | null
+          id: string
+          phone?: string | null
+          profile_image_url?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          full_name?: string | null
+          id?: string
+          phone?: string | null
+          profile_image_url?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      receipt_templates: {
+        Row: {
+          accent_color: string | null
+          body_bg_color: string | null
+          body_text_color: string | null
+          created_at: string | null
+          font_family: string | null
+          header_bg_color: string | null
+          header_text_color: string | null
+          id: string
+          is_default: boolean | null
+          name: string
+          updated_at: string | null
+        }
+        Insert: {
+          accent_color?: string | null
+          body_bg_color?: string | null
+          body_text_color?: string | null
+          created_at?: string | null
+          font_family?: string | null
+          header_bg_color?: string | null
+          header_text_color?: string | null
+          id?: string
+          is_default?: boolean | null
+          name: string
+          updated_at?: string | null
+        }
+        Update: {
+          accent_color?: string | null
+          body_bg_color?: string | null
+          body_text_color?: string | null
+          created_at?: string | null
+          font_family?: string | null
+          header_bg_color?: string | null
+          header_text_color?: string | null
+          id?: string
+          is_default?: boolean | null
+          name?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       receipts: {
         Row: {
           address: string
@@ -26,6 +95,7 @@ export type Database = {
           receipt_date: string
           subtotal: number
           tax_amount: number
+          template_id: string | null
           total_amount: number
           updated_at: string | null
           user_id: string
@@ -41,6 +111,7 @@ export type Database = {
           receipt_date: string
           subtotal: number
           tax_amount: number
+          template_id?: string | null
           total_amount: number
           updated_at?: string | null
           user_id: string
@@ -56,8 +127,38 @@ export type Database = {
           receipt_date?: string
           subtotal?: number
           tax_amount?: number
+          template_id?: string | null
           total_amount?: number
           updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "receipts_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "receipt_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_roles: {
+        Row: {
+          created_at: string | null
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
         }
         Relationships: []
@@ -67,10 +168,16 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -197,6 +304,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "user"],
+    },
   },
 } as const
