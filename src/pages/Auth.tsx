@@ -113,6 +113,10 @@ const Auth = () => {
           </div>
           <h1 className="mb-2 text-3xl font-bold text-foreground">Digital Receipt System</h1>
           <p className="text-muted-foreground">Manage your receipts with ease</p>
+          <div className="mt-3 inline-flex items-center gap-2 rounded-lg bg-primary/10 px-3 py-1.5 text-sm text-primary">
+            <Receipt className="h-4 w-4" />
+            <span className="font-medium">Admin? Sign in here with your admin credentials</span>
+          </div>
         </div>
 
         <Card className="shadow-medium">
