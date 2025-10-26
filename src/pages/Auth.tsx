@@ -20,6 +20,7 @@ const Auth = () => {
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isAdminLogin, setIsAdminLogin] = useState(false);
 
   useEffect(() => {
     // Check if user is already logged in
@@ -81,7 +82,7 @@ const Auth = () => {
       const validated = authSchema.parse({ email, password });
       setLoading(true);
 
-      const { error } = await supabase.auth.signInWithPassword({
+      const { error, data } = await supabase.auth.signInWithPassword({
         email: validated.email,
         password: validated.password,
       });
@@ -91,6 +92,21 @@ const Auth = () => {
           toast.error("Invalid email or password");
         } else {
           toast.error(error.message);
+        }
+      } else if (isAdminLogin && data.user) {
+        // Check if user has admin role
+        const { data: roleData } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', data.user.id)
+          .single();
+        
+        if (roleData?.role === 'admin') {
+          toast.success("Admin login successful!");
+          navigate("/admin");
+        } else {
+          await supabase.auth.signOut();
+          toast.error("Access denied. Admin privileges required.");
         }
       }
     } catch (error) {
@@ -113,18 +129,72 @@ const Auth = () => {
           </div>
           <h1 className="mb-2 text-3xl font-bold text-foreground">Digital Receipt System</h1>
           <p className="text-muted-foreground">Manage your receipts with ease</p>
-          <div className="mt-3 inline-flex items-center gap-2 rounded-lg bg-primary/10 px-3 py-1.5 text-sm text-primary">
-            <Receipt className="h-4 w-4" />
-            <span className="font-medium">Admin? Sign in here with your admin credentials</span>
-          </div>
         </div>
 
         <Card className="shadow-medium">
           <CardHeader>
             <CardTitle>Welcome</CardTitle>
-            <CardDescription>Sign in to your account or create a new one</CardDescription>
+            <CardDescription>
+              {isAdminLogin ? "Admin Login - Sign in with admin credentials" : "Sign in to your account or create a new one"}
+            </CardDescription>
           </CardHeader>
           <CardContent>
+            {!isAdminLogin && (
+              <div className="mb-4 flex justify-center">
+                <Button 
+                  variant="outline" 
+                  onClick={() => setIsAdminLogin(true)}
+                  className="w-full"
+                >
+                  Admin Login
+                </Button>
+              </div>
+            )}
+            
+            {isAdminLogin ? (
+              <form onSubmit={handleSignIn} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="admin-email">Admin Email</Label>
+                  <Input
+                    id="admin-email"
+                    type="email"
+                    placeholder="admin@example.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value.trim())}
+                    required
+                    maxLength={255}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="admin-password">Password</Label>
+                  <Input
+                    id="admin-password"
+                    type="password"
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    minLength={6}
+                    maxLength={100}
+                  />
+                </div>
+                <Button type="submit" className="w-full" disabled={loading}>
+                  {loading ? "Signing in..." : "Admin Sign In"}
+                </Button>
+                <Button 
+                  type="button" 
+                  variant="ghost" 
+                  className="w-full"
+                  onClick={() => {
+                    setIsAdminLogin(false);
+                    setEmail("");
+                    setPassword("");
+                  }}
+                >
+                  Back to Regular Login
+                </Button>
+              </form>
+            ) : (
             <Tabs defaultValue="signin" className="w-full">
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="signin">Sign In</TabsTrigger>
@@ -200,6 +270,7 @@ const Auth = () => {
                 </form>
               </TabsContent>
             </Tabs>
+            )}
           </CardContent>
         </Card>
       </div>
