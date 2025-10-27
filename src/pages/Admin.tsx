@@ -8,8 +8,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { ArrowLeft, Shield, Users, FileText, Palette, Trash2, Save } from "lucide-react";
+import { ArrowLeft, Shield, Users, FileText, Palette, Trash2, Save, Edit, Ban, Unlock } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
 interface User {
   id: string;
@@ -18,6 +20,7 @@ interface User {
   phone: string | null;
   profile_image_url: string | null;
   receipt_count: number;
+  banned_until: string | null;
 }
 
 interface Template {
@@ -47,6 +50,10 @@ const Admin = () => {
     accent_color: "#3b82f6",
     font_family: "Arial",
   });
+  const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [editEmail, setEditEmail] = useState("");
+  const [editPassword, setEditPassword] = useState("");
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
 
   useEffect(() => {
     checkAdminAndFetchData();
@@ -101,17 +108,99 @@ const Admin = () => {
             .select("*", { count: "exact", head: true })
             .eq("user_id", profile.id);
 
-          return {
+           return {
             id: profile.id,
             email: authUser?.user?.email || "",
             full_name: profile.full_name,
             phone: profile.phone,
             profile_image_url: profile.profile_image_url,
             receipt_count: count || 0,
+            banned_until: (authUser?.user as any)?.banned_until || null,
           };
         })
       );
       setUsers(usersWithDetails);
+    }
+  };
+
+  const handleEditUser = (user: User) => {
+    setEditingUser(user);
+    setEditEmail(user.email);
+    setEditPassword("");
+    setEditDialogOpen(true);
+  };
+
+  const handleUpdateUser = async () => {
+    if (!editingUser) return;
+
+    try {
+      const updates: any = {};
+      
+      if (editEmail && editEmail !== editingUser.email) {
+        updates.email = editEmail;
+      }
+      
+      if (editPassword && editPassword.length >= 6) {
+        updates.password = editPassword;
+      }
+
+      if (Object.keys(updates).length > 0) {
+        const { error } = await supabase.auth.admin.updateUserById(
+          editingUser.id,
+          updates
+        );
+
+        if (error) throw error;
+        toast.success("User updated successfully");
+        setEditDialogOpen(false);
+        fetchUsers();
+      } else {
+        toast.error("No changes to update");
+      }
+    } catch (error: any) {
+      toast.error(error.message);
+    }
+  };
+
+  const handleDeleteUser = async (userId: string) => {
+    try {
+      const { error } = await supabase.auth.admin.deleteUser(userId);
+      if (error) throw error;
+      toast.success("User deleted successfully");
+      fetchUsers();
+    } catch (error: any) {
+      toast.error(error.message);
+    }
+  };
+
+  const handleBlockUser = async (userId: string) => {
+    try {
+      const banDuration = new Date();
+      banDuration.setFullYear(banDuration.getFullYear() + 10); // Block for 10 years
+      
+      const { error } = await supabase.auth.admin.updateUserById(userId, {
+        ban_duration: "876000h", // 10 years in hours
+      });
+
+      if (error) throw error;
+      toast.success("User blocked successfully");
+      fetchUsers();
+    } catch (error: any) {
+      toast.error(error.message);
+    }
+  };
+
+  const handleUnblockUser = async (userId: string) => {
+    try {
+      const { error } = await supabase.auth.admin.updateUserById(userId, {
+        ban_duration: "none",
+      });
+
+      if (error) throw error;
+      toast.success("User unblocked successfully");
+      fetchUsers();
+    } catch (error: any) {
+      toast.error(error.message);
     }
   };
 
@@ -227,6 +316,8 @@ const Admin = () => {
                       <TableHead>Email</TableHead>
                       <TableHead>Phone</TableHead>
                       <TableHead>Receipts</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -248,6 +339,117 @@ const Admin = () => {
                           >
                             {user.receipt_count} receipts
                           </Button>
+                        </TableCell>
+                        <TableCell>
+                          {user.banned_until ? (
+                            <span className="text-xs text-destructive font-medium">Blocked</span>
+                          ) : (
+                            <span className="text-xs text-green-600 font-medium">Active</span>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex gap-2">
+                            <Dialog open={editDialogOpen && editingUser?.id === user.id} onOpenChange={setEditDialogOpen}>
+                              <DialogTrigger asChild>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handleEditUser(user)}
+                                >
+                                  <Edit className="h-4 w-4" />
+                                </Button>
+                              </DialogTrigger>
+                              <DialogContent>
+                                <DialogHeader>
+                                  <DialogTitle>Edit User</DialogTitle>
+                                  <DialogDescription>Update user email and password</DialogDescription>
+                                </DialogHeader>
+                                <div className="space-y-4 py-4">
+                                  <div className="space-y-2">
+                                    <Label htmlFor="edit-email">Email</Label>
+                                    <Input
+                                      id="edit-email"
+                                      type="email"
+                                      value={editEmail}
+                                      onChange={(e) => setEditEmail(e.target.value)}
+                                      placeholder="user@example.com"
+                                    />
+                                  </div>
+                                  <div className="space-y-2">
+                                    <Label htmlFor="edit-password">New Password (optional)</Label>
+                                    <Input
+                                      id="edit-password"
+                                      type="password"
+                                      value={editPassword}
+                                      onChange={(e) => setEditPassword(e.target.value)}
+                                      placeholder="Leave empty to keep current"
+                                      minLength={6}
+                                    />
+                                    <p className="text-xs text-muted-foreground">
+                                      Password must be at least 6 characters
+                                    </p>
+                                  </div>
+                                  <Button onClick={handleUpdateUser} className="w-full">
+                                    Update User
+                                  </Button>
+                                </div>
+                              </DialogContent>
+                            </Dialog>
+
+                            {user.banned_until ? (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleUnblockUser(user.id)}
+                              >
+                                <Unlock className="h-4 w-4" />
+                              </Button>
+                            ) : (
+                              <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                  <Button variant="outline" size="sm">
+                                    <Ban className="h-4 w-4" />
+                                  </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                  <AlertDialogHeader>
+                                    <AlertDialogTitle>Block User?</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                      This will prevent {user.email} from accessing the system.
+                                    </AlertDialogDescription>
+                                  </AlertDialogHeader>
+                                  <AlertDialogFooter>
+                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                    <AlertDialogAction onClick={() => handleBlockUser(user.id)}>
+                                      Block
+                                    </AlertDialogAction>
+                                  </AlertDialogFooter>
+                                </AlertDialogContent>
+                              </AlertDialog>
+                            )}
+
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button variant="destructive" size="sm">
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>Delete User?</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    This will permanently delete {user.email} and all their data. This action cannot be undone.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                  <AlertDialogAction onClick={() => handleDeleteUser(user.id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                                    Delete
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))}
