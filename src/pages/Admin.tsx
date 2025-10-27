@@ -104,20 +104,27 @@ const Admin = () => {
     if (profiles) {
       const usersWithDetails = await Promise.all(
         profiles.map(async (profile) => {
-          const { data: authUser } = await supabase.auth.admin.getUserById(profile.id);
-          const { count } = await supabase
+          // Get email from auth metadata (stored in profiles if available)
+          const { data: receiptsData, count } = await supabase
             .from("receipts")
             .select("*", { count: "exact", head: true })
             .eq("user_id", profile.id);
 
-           return {
+          // Try to get email from user_roles join
+          const { data: userData } = await supabase
+            .from("user_roles")
+            .select("user_id")
+            .eq("user_id", profile.id)
+            .single();
+
+          return {
             id: profile.id,
-            email: authUser?.user?.email || "",
+            email: `user_${profile.id.substring(0, 8)}`, // Fallback email display
             full_name: profile.full_name,
             phone: profile.phone,
             profile_image_url: profile.profile_image_url,
             receipt_count: count || 0,
-            banned_until: (authUser?.user as any)?.banned_until || null,
+            banned_until: null,
           };
         })
       );
@@ -136,74 +143,33 @@ const Admin = () => {
     if (!editingUser) return;
 
     try {
-      const updates: any = {};
-      
+      // Update profile information (email update requires edge function)
       if (editEmail && editEmail !== editingUser.email) {
-        updates.email = editEmail;
+        toast.error("Email updates require contacting system administrator");
+        return;
       }
       
       if (editPassword && editPassword.length >= 6) {
-        updates.password = editPassword;
+        toast.error("Password updates require contacting system administrator");
+        return;
       }
 
-      if (Object.keys(updates).length > 0) {
-        const { error } = await supabase.auth.admin.updateUserById(
-          editingUser.id,
-          updates
-        );
-
-        if (error) throw error;
-        toast.success("User updated successfully");
-        setEditDialogOpen(false);
-        fetchUsers();
-      } else {
-        toast.error("No changes to update");
-      }
+      toast.info("User management features require backend API");
     } catch (error: any) {
       toast.error(error.message);
     }
   };
 
   const handleDeleteUser = async (userId: string) => {
-    try {
-      const { error } = await supabase.auth.admin.deleteUser(userId);
-      if (error) throw error;
-      toast.success("User deleted successfully");
-      fetchUsers();
-    } catch (error: any) {
-      toast.error(error.message);
-    }
+    toast.error("User deletion requires backend API access");
   };
 
   const handleBlockUser = async (userId: string) => {
-    try {
-      const banDuration = new Date();
-      banDuration.setFullYear(banDuration.getFullYear() + 10); // Block for 10 years
-      
-      const { error } = await supabase.auth.admin.updateUserById(userId, {
-        ban_duration: "876000h", // 10 years in hours
-      });
-
-      if (error) throw error;
-      toast.success("User blocked successfully");
-      fetchUsers();
-    } catch (error: any) {
-      toast.error(error.message);
-    }
+    toast.error("User blocking requires backend API access");
   };
 
   const handleUnblockUser = async (userId: string) => {
-    try {
-      const { error } = await supabase.auth.admin.updateUserById(userId, {
-        ban_duration: "none",
-      });
-
-      if (error) throw error;
-      toast.success("User unblocked successfully");
-      fetchUsers();
-    } catch (error: any) {
-      toast.error(error.message);
-    }
+    toast.error("User unblocking requires backend API access");
   };
 
   const handleViewUser = (user: User) => {
@@ -212,37 +178,7 @@ const Admin = () => {
   };
 
   const handleDirectLogin = async (userId: string, userEmail: string) => {
-    try {
-      // Generate a one-time link for the user
-      const { data, error } = await supabase.auth.admin.generateLink({
-        type: 'magiclink',
-        email: userEmail
-      });
-
-      if (error) throw error;
-
-      if (data.properties?.action_link) {
-        // Extract the token from the action link
-        const url = new URL(data.properties.action_link);
-        const token = url.searchParams.get('token');
-        const type = url.searchParams.get('type');
-        
-        if (token && type) {
-          // Verify the OTP token
-          const { error: verifyError } = await supabase.auth.verifyOtp({
-            token_hash: token,
-            type: type as any,
-          });
-
-          if (verifyError) throw verifyError;
-
-          toast.success(`Logged in as ${userEmail}`);
-          navigate("/");
-        }
-      }
-    } catch (error: any) {
-      toast.error("Direct login failed: " + error.message);
-    }
+    toast.error("Direct login requires backend API access");
   };
 
   const fetchTemplates = async () => {
