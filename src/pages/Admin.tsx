@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { ArrowLeft, Shield, Users, FileText, Palette, Trash2, Save, Edit, Ban, Unlock } from "lucide-react";
+import { ArrowLeft, Shield, Users, FileText, Palette, Trash2, Save, Edit, Ban, Unlock, Eye, LogIn } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
@@ -54,6 +54,8 @@ const Admin = () => {
   const [editEmail, setEditEmail] = useState("");
   const [editPassword, setEditPassword] = useState("");
   const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [viewingUser, setViewingUser] = useState<User | null>(null);
+  const [viewDialogOpen, setViewDialogOpen] = useState(false);
 
   useEffect(() => {
     checkAdminAndFetchData();
@@ -204,6 +206,45 @@ const Admin = () => {
     }
   };
 
+  const handleViewUser = (user: User) => {
+    setViewingUser(user);
+    setViewDialogOpen(true);
+  };
+
+  const handleDirectLogin = async (userId: string, userEmail: string) => {
+    try {
+      // Generate a one-time link for the user
+      const { data, error } = await supabase.auth.admin.generateLink({
+        type: 'magiclink',
+        email: userEmail
+      });
+
+      if (error) throw error;
+
+      if (data.properties?.action_link) {
+        // Extract the token from the action link
+        const url = new URL(data.properties.action_link);
+        const token = url.searchParams.get('token');
+        const type = url.searchParams.get('type');
+        
+        if (token && type) {
+          // Verify the OTP token
+          const { error: verifyError } = await supabase.auth.verifyOtp({
+            token_hash: token,
+            type: type as any,
+          });
+
+          if (verifyError) throw verifyError;
+
+          toast.success(`Logged in as ${userEmail}`);
+          navigate("/");
+        }
+      }
+    } catch (error: any) {
+      toast.error("Direct login failed: " + error.message);
+    }
+  };
+
   const fetchTemplates = async () => {
     const { data } = await supabase
       .from("receipt_templates")
@@ -349,6 +390,36 @@ const Admin = () => {
                         </TableCell>
                         <TableCell>
                           <div className="flex gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleViewUser(user)}
+                            >
+                              <Eye className="h-4 w-4" />
+                            </Button>
+
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button variant="outline" size="sm">
+                                  <LogIn className="h-4 w-4" />
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>Login as this user?</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    You will be logged in as {user.email}. Your current admin session will end.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                  <AlertDialogAction onClick={() => handleDirectLogin(user.id, user.email)}>
+                                    Login as User
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+
                             <Dialog open={editDialogOpen && editingUser?.id === user.id} onOpenChange={setEditDialogOpen}>
                               <DialogTrigger asChild>
                                 <Button
@@ -457,6 +528,87 @@ const Admin = () => {
                 </Table>
               </CardContent>
             </Card>
+
+            {/* View User Dialog */}
+            <Dialog open={viewDialogOpen} onOpenChange={setViewDialogOpen}>
+              <DialogContent className="max-w-2xl">
+                <DialogHeader>
+                  <DialogTitle>User Details</DialogTitle>
+                  <DialogDescription>Complete user information</DialogDescription>
+                </DialogHeader>
+                {viewingUser && (
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-4">
+                      <Avatar className="h-20 w-20">
+                        <AvatarImage src={viewingUser.profile_image_url || ""} />
+                        <AvatarFallback className="text-2xl">
+                          {viewingUser.full_name?.[0] || viewingUser.email[0]?.toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <h3 className="text-xl font-semibold">{viewingUser.full_name || "No name set"}</h3>
+                        <p className="text-sm text-muted-foreground">{viewingUser.email}</p>
+                      </div>
+                    </div>
+
+                    <div className="grid gap-4 border-t pt-4">
+                      <div className="grid grid-cols-2 gap-2">
+                        <div className="text-sm font-medium">User ID:</div>
+                        <div className="text-sm text-muted-foreground">{viewingUser.id}</div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        <div className="text-sm font-medium">Email:</div>
+                        <div className="text-sm text-muted-foreground">{viewingUser.email}</div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        <div className="text-sm font-medium">Full Name:</div>
+                        <div className="text-sm text-muted-foreground">{viewingUser.full_name || "Not set"}</div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        <div className="text-sm font-medium">Phone:</div>
+                        <div className="text-sm text-muted-foreground">{viewingUser.phone || "Not set"}</div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        <div className="text-sm font-medium">Total Receipts:</div>
+                        <div className="text-sm text-muted-foreground">{viewingUser.receipt_count}</div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        <div className="text-sm font-medium">Account Status:</div>
+                        <div className="text-sm">
+                          {viewingUser.banned_until ? (
+                            <span className="text-destructive font-medium">Blocked</span>
+                          ) : (
+                            <span className="text-green-600 font-medium">Active</span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex gap-2 border-t pt-4">
+                      <Button
+                        variant="outline"
+                        onClick={() => navigate(`/admin/user/${viewingUser.id}/receipts`)}
+                        className="flex-1"
+                      >
+                        <FileText className="mr-2 h-4 w-4" />
+                        View Receipts
+                      </Button>
+                      <Button
+                        variant="outline"
+                        onClick={() => {
+                          setViewDialogOpen(false);
+                          handleEditUser(viewingUser);
+                        }}
+                        className="flex-1"
+                      >
+                        <Edit className="mr-2 h-4 w-4" />
+                        Edit User
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </DialogContent>
+            </Dialog>
           </TabsContent>
 
           <TabsContent value="templates">
