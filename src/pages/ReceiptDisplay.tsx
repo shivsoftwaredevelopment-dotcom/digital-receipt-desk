@@ -133,7 +133,7 @@ const ReceiptDisplay = () => {
             </div>
             
             {/* Address, BP, Pulse line - positioned on second dotted line */}
-            <div className="absolute" style={{ top: '335px', left: '450px', right: '20px' }}>
+            <div className="absolute" style={{ top: '340px', left: '450px', right: '20px' }}>
               <div className="flex items-center justify-between text-sm">
                 <span className="font-medium flex-1">{receipt.address}</span>
                 <span className="font-medium w-32">{receipt.bp || '-'}</span>
