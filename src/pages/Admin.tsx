@@ -96,6 +96,7 @@ const Admin = () => {
       .from("profiles")
       .select(`
         id,
+        email,
         full_name,
         phone,
         profile_image_url
@@ -119,7 +120,7 @@ const Admin = () => {
 
           return {
             id: profile.id,
-            email: `user_${profile.id.substring(0, 8)}`, // Fallback email display
+            email: profile.email || "No email",
             full_name: profile.full_name,
             phone: profile.phone,
             profile_image_url: profile.profile_image_url,
