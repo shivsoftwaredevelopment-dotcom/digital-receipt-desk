@@ -140,6 +140,37 @@ const ReceiptDisplay = () => {
                 <span className="font-medium w-32">{receipt.pulse || '-'}</span>
               </div>
             </div>
+
+            {/* Items list - positioned in the center empty space */}
+            <div className="absolute" style={{ top: '380px', left: '100px', right: '100px' }}>
+              <div className="space-y-2">
+                {receipt.items.map((item, index) => (
+                  <div key={index} className="flex justify-between text-sm">
+                    <span className="font-medium">{item.name}</span>
+                    <span className="font-medium">Qty: {item.quantity}</span>
+                    <span className="font-medium">₹{item.price.toFixed(2)}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Tax and Total details */}
+            <div className="absolute" style={{ bottom: '150px', right: '100px', width: '300px' }}>
+              <div className="space-y-1 text-sm">
+                <div className="flex justify-between">
+                  <span className="font-medium">Subtotal:</span>
+                  <span className="font-medium">₹{receipt.subtotal.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="font-medium">Tax:</span>
+                  <span className="font-medium">₹{receipt.tax_amount.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between border-t border-foreground/20 pt-1">
+                  <span className="font-bold">Total:</span>
+                  <span className="font-bold">₹{receipt.total_amount.toFixed(2)}</span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
