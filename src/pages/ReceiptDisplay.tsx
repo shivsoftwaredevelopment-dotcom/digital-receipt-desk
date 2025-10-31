@@ -142,7 +142,7 @@ const ReceiptDisplay = () => {
             </div>
 
             {/* Items list - positioned in the center empty space */}
-            <div className="absolute" style={{ top: '380px', left: '100px', right: '100px' }}>
+            <div className="absolute" style={{ top: '400px', left: '350px', right: '20px' }}>
               <div className="space-y-3">
                 {receipt.items.map((item, index) => (
                   <div key={index} className="flex justify-between text-base" style={{ color: '#000000' }}>
