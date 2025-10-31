@@ -124,7 +124,7 @@ const ReceiptDisplay = () => {
           {/* Overlay text on the template */}
           <div className="relative h-full w-full p-8">
             {/* Name, Age, Date line - positioned on first dotted line */}
-            <div className="absolute" style={{ top: '300px', left: '360px', right: '40px' }}>
+            <div className="absolute" style={{ top: '300px', left: '360px', right: '30px' }}>
               <div className="flex items-center justify-between text-sm">
                 <span className="font-medium">{receipt.customer_name}</span>
                 <span className="font-medium">{receipt.age}</span>
