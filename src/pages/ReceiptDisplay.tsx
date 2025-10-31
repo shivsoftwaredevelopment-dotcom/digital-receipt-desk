@@ -143,12 +143,12 @@ const ReceiptDisplay = () => {
 
             {/* Items list - positioned in the center empty space */}
             <div className="absolute" style={{ top: '380px', left: '100px', right: '100px' }}>
-              <div className="space-y-2">
+              <div className="space-y-3">
                 {receipt.items.map((item, index) => (
-                  <div key={index} className="flex justify-between text-sm">
-                    <span className="font-medium">{item.name}</span>
-                    <span className="font-medium">Qty: {item.quantity}</span>
-                    <span className="font-medium">₹{item.price.toFixed(2)}</span>
+                  <div key={index} className="flex justify-between text-base" style={{ color: '#000000' }}>
+                    <span className="font-semibold">{item.name}</span>
+                    <span className="font-semibold">Qty: {item.quantity}</span>
+                    <span className="font-semibold">₹{item.price.toFixed(2)}</span>
                   </div>
                 ))}
               </div>
