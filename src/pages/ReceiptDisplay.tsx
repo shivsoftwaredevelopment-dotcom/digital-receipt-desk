@@ -124,20 +124,22 @@ const ReceiptDisplay = () => {
           {/* Overlay text on the template */}
           <div className="relative h-full w-full p-8">
             {/* Name, Age, Date line - positioned on first dotted line */}
-            <div className="absolute" style={{ top: '285px', left: '300px', right: '50px' }}>
-              <div className="flex items-center justify-between text-sm">
-                <span className="font-medium">{receipt.customer_name}</span>
-                <span className="font-medium">{receipt.age}</span>
-                <span className="font-medium">{new Date(receipt.receipt_date).toLocaleDateString()}</span>
+            <div className="absolute" style={{ top: '168px', left: '255px', right: '100px' }}>
+              <div className="flex items-center gap-8 text-sm" style={{ color: '#000000' }}>
+                <span className="font-medium flex-1">{receipt.customer_name}</span>
+                <span className="font-medium" style={{ minWidth: '60px', textAlign: 'center' }}>{receipt.age}</span>
+                <span className="font-medium" style={{ minWidth: '120px', textAlign: 'right' }}>
+                  {new Date(receipt.receipt_date).toLocaleDateString('en-GB')}
+                </span>
               </div>
             </div>
             
             {/* Address, BP, Pulse line - positioned on second dotted line */}
-            <div className="absolute" style={{ top: '320px', left: '300px', right: '50px' }}>
-              <div className="flex items-center justify-between text-sm">
+            <div className="absolute" style={{ top: '203px', left: '255px', right: '100px' }}>
+              <div className="flex items-center gap-8 text-sm" style={{ color: '#000000' }}>
                 <span className="font-medium flex-1">{receipt.address}</span>
-                <span className="font-medium w-32">{receipt.bp || '-'}</span>
-                <span className="font-medium w-32">{receipt.pulse || '-'}</span>
+                <span className="font-medium" style={{ minWidth: '80px', textAlign: 'center' }}>{receipt.bp || '-'}</span>
+                <span className="font-medium" style={{ minWidth: '80px', textAlign: 'center' }}>{receipt.pulse || '-'}</span>
               </div>
             </div>
 
