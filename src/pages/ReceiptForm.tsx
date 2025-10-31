@@ -24,8 +24,11 @@ const itemSchema = z.object({
 
 const receiptSchema = z.object({
   customerName: z.string().trim().min(1, "Name required").max(100),
+  age: z.string().trim().min(1, "Age required").max(10),
   mobileNumber: z.string().trim().regex(/^[0-9]{10}$/, "Enter valid 10-digit mobile"),
   address: z.string().trim().min(1, "Address required").max(200),
+  bp: z.string().trim().optional(),
+  pulse: z.string().trim().optional(),
   branch: z.string().min(1, "Branch required"),
   date: z.string().min(1, "Date required"),
   items: z.array(itemSchema).min(1, "Add at least one item"),
@@ -42,8 +45,11 @@ interface Item {
 const ReceiptForm = () => {
   const navigate = useNavigate();
   const [customerName, setCustomerName] = useState("");
+  const [age, setAge] = useState("");
   const [mobileNumber, setMobileNumber] = useState("");
   const [address, setAddress] = useState("");
+  const [bp, setBp] = useState("");
+  const [pulse, setPulse] = useState("");
   const [branch, setBranch] = useState("Near Shivaji Chowk Banka");
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
   const [items, setItems] = useState<Item[]>([
@@ -88,8 +94,11 @@ const ReceiptForm = () => {
     try {
       const validated = receiptSchema.parse({
         customerName,
+        age,
         mobileNumber,
         address,
+        bp,
+        pulse,
         branch,
         date,
         items: items.map(({ id, ...item }) => item),
@@ -113,8 +122,11 @@ const ReceiptForm = () => {
         .insert({
           user_id: user.id,
           customer_name: validated.customerName,
+          age: validated.age,
           mobile_number: validated.mobileNumber,
           address: validated.address,
+          bp: validated.bp,
+          pulse: validated.pulse,
           branch: validated.branch,
           receipt_date: validated.date,
           items: validated.items,
@@ -184,7 +196,7 @@ const ReceiptForm = () => {
               <CardDescription>Enter customer information</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid gap-4 md:grid-cols-2">
+              <div className="grid gap-4 md:grid-cols-3">
                 <div className="space-y-2">
                   <Label htmlFor="name">Customer Name *</Label>
                   <Input
@@ -193,6 +205,17 @@ const ReceiptForm = () => {
                     onChange={(e) => setCustomerName(e.target.value)}
                     placeholder="John Doe"
                     maxLength={100}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="age">Age *</Label>
+                  <Input
+                    id="age"
+                    value={age}
+                    onChange={(e) => setAge(e.target.value)}
+                    placeholder="25"
+                    maxLength={10}
                     required
                   />
                 </div>
@@ -219,6 +242,26 @@ const ReceiptForm = () => {
                   maxLength={200}
                   required
                 />
+              </div>
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="bp">BP (Blood Pressure)</Label>
+                  <Input
+                    id="bp"
+                    value={bp}
+                    onChange={(e) => setBp(e.target.value)}
+                    placeholder="120/80"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="pulse">Pulse</Label>
+                  <Input
+                    id="pulse"
+                    value={pulse}
+                    onChange={(e) => setPulse(e.target.value)}
+                    placeholder="72"
+                  />
+                </div>
               </div>
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">

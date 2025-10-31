@@ -89,12 +89,15 @@ export type Database = {
       receipts: {
         Row: {
           address: string
+          age: string | null
+          bp: string | null
           branch: string
           created_at: string | null
           customer_name: string
           id: string
           items: Json
           mobile_number: string
+          pulse: string | null
           receipt_date: string
           subtotal: number
           tax_amount: number
@@ -105,12 +108,15 @@ export type Database = {
         }
         Insert: {
           address?: string
+          age?: string | null
+          bp?: string | null
           branch?: string
           created_at?: string | null
           customer_name: string
           id?: string
           items: Json
           mobile_number: string
+          pulse?: string | null
           receipt_date: string
           subtotal: number
           tax_amount: number
@@ -121,12 +127,15 @@ export type Database = {
         }
         Update: {
           address?: string
+          age?: string | null
+          bp?: string | null
           branch?: string
           created_at?: string | null
           customer_name?: string
           id?: string
           items?: Json
           mobile_number?: string
+          pulse?: string | null
           receipt_date?: string
           subtotal?: number
           tax_amount?: number

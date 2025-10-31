@@ -14,8 +14,11 @@ interface ReceiptItem {
 interface Receipt {
   id: string;
   customer_name: string;
+  age: string;
   mobile_number: string;
   address: string;
+  bp: string;
+  pulse: string;
   branch: string;
   receipt_date: string;
   items: ReceiptItem[];
@@ -111,82 +114,32 @@ const ReceiptDisplay = () => {
           </div>
         </div>
 
-        <div className="receipt-print mx-auto max-w-2xl rounded-lg border bg-card p-4 shadow-strong">
-          {/* Header - Minimal spacing */}
-          <div className="mb-3 flex items-start justify-between border-b pb-2">
-            <div className="flex-1">
-              <h1 className="mb-0.5 text-lg font-bold">TAX INVOICE</h1>
-              <p className="text-xs text-muted-foreground">#{receipt.id.slice(0, 8).toUpperCase()}</p>
-            </div>
-            <div className="text-right text-xs leading-tight">
-              <p className="font-bold">Shiv Dental Clinic</p>
-              <p className="font-medium">{receipt.branch}</p>
-              <p>rkprasad0306@gmail.com</p>
-              <p>9973479904</p>
-            </div>
-          </div>
-
-          {/* Date and Customer Details */}
-          <div className="mb-3 grid grid-cols-2 gap-3 text-xs">
-            <div>
-              <p className="mb-1 font-semibold">Date:</p>
-              <p>{new Date(receipt.receipt_date).toLocaleDateString()}</p>
-            </div>
-            <div>
-              <p className="mb-1 font-semibold">Customer:</p>
-              <p className="font-medium">{receipt.customer_name}</p>
-              <p>{receipt.mobile_number}</p>
-              <p>{receipt.address}</p>
-            </div>
-          </div>
-
-          {/* Items Table */}
-          <div className="mb-3">
-            <table className="w-full border-collapse text-xs">
-              <thead>
-                <tr className="border-b border-primary">
-                  <th className="py-1 text-left font-semibold">Item</th>
-                  <th className="py-1 text-center font-semibold">Qty</th>
-                  <th className="py-1 text-right font-semibold">Rate</th>
-                  <th className="py-1 text-right font-semibold">Amount</th>
-                </tr>
-              </thead>
-              <tbody>
-                {receipt.items.map((item, index) => (
-                  <tr key={index} className="border-b">
-                    <td className="py-1">{item.name}</td>
-                    <td className="py-1 text-center">{item.quantity}</td>
-                    <td className="py-1 text-right">₹{item.price.toFixed(2)}</td>
-                    <td className="py-1 text-right font-semibold">
-                      ₹{(item.quantity * item.price).toFixed(2)}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          {/* Totals */}
-          <div className="flex justify-end">
-            <div className="w-48 space-y-1 text-xs">
-              <div className="flex justify-between">
-                <span>Subtotal:</span>
-                <span>₹{receipt.subtotal.toFixed(2)}</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Tax:</span>
-                <span>₹{receipt.tax_amount.toFixed(2)}</span>
-              </div>
-              <div className="flex justify-between border-t border-primary pt-1 font-bold">
-                <span>Total:</span>
-                <span className="text-primary">₹{receipt.total_amount.toFixed(2)}</span>
+        <div className="receipt-print relative mx-auto max-w-4xl" style={{ aspectRatio: '8.5/11' }}>
+          <img 
+            src={new URL('../assets/prescription-template.jpg', import.meta.url).href}
+            alt="Prescription Template"
+            className="absolute inset-0 h-full w-full object-contain"
+          />
+          
+          {/* Overlay text on the template */}
+          <div className="relative h-full w-full p-8">
+            {/* Name, Age, Date line - positioned on first dotted line */}
+            <div className="absolute" style={{ top: '285px', left: '300px', right: '50px' }}>
+              <div className="flex items-center justify-between text-sm">
+                <span className="font-medium">{receipt.customer_name}</span>
+                <span className="font-medium">{receipt.age}</span>
+                <span className="font-medium">{new Date(receipt.receipt_date).toLocaleDateString()}</span>
               </div>
             </div>
-          </div>
-
-          {/* Footer */}
-          <div className="mt-3 border-t pt-2 text-center text-xs text-muted-foreground">
-            <p>Thank You For Visiting My Clinic shop!</p>
+            
+            {/* Address, BP, Pulse line - positioned on second dotted line */}
+            <div className="absolute" style={{ top: '320px', left: '300px', right: '50px' }}>
+              <div className="flex items-center justify-between text-sm">
+                <span className="font-medium flex-1">{receipt.address}</span>
+                <span className="font-medium w-32">{receipt.bp || '-'}</span>
+                <span className="font-medium w-32">{receipt.pulse || '-'}</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
