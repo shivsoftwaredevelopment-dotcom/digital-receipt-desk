@@ -124,7 +124,7 @@ const ReceiptDisplay = () => {
           {/* Overlay text on the template */}
           <div className="relative h-full w-full p-8">
             {/* Name, Age, Date line - positioned on first dotted line */}
-            <div className="absolute" style={{ top: '275px', left: '350px', right: '50px' }}>
+            <div className="absolute" style={{ top: '285px', left: '300px', right: '50px' }}>
               <div className="flex items-center justify-between text-sm">
                 <span className="font-medium">{receipt.customer_name}</span>
                 <span className="font-medium">{receipt.age}</span>
@@ -133,7 +133,7 @@ const ReceiptDisplay = () => {
             </div>
             
             {/* Address, BP, Pulse line - positioned on second dotted line */}
-            <div className="absolute" style={{ top: '275px', left: '350px', right: '50px' }}>
+            <div className="absolute" style={{ top: '320px', left: '300px', right: '50px' }}>
               <div className="flex items-center justify-between text-sm">
                 <span className="font-medium flex-1">{receipt.address}</span>
                 <span className="font-medium w-32">{receipt.bp || '-'}</span>
