@@ -114,58 +114,58 @@ const ReceiptDisplay = () => {
           </div>
         </div>
 
-        <div className="receipt-print relative mx-auto max-w-4xl" style={{ aspectRatio: '8.5/11' }}>
+        <div className="receipt-print relative mx-auto" style={{ width: '210mm', minHeight: '297mm' }}>
           <img 
             src={new URL('../assets/prescription-template.jpg', import.meta.url).href}
             alt="Prescription Template"
-            className="absolute inset-0 h-full w-full object-contain"
+            className="print-bg absolute inset-0 h-full w-full object-contain"
           />
           
           {/* Overlay text on the template */}
           <div className="relative h-full w-full p-8">
-            {/* Name, Age, Date line - positioned on first dotted line */}
-            <div className="absolute" style={{ top: '300px', left: '540px', right: '20px' }}>
-              <div className="flex items-center justify-between text-sm">
+            {/* Name, Age, Date line */}
+            <div className="absolute text-sm" style={{ top: '105mm', left: '75mm', width: '120mm' }}>
+              <div className="flex items-center justify-between gap-4">
                 <span className="font-medium">{receipt.customer_name}</span>
                 <span className="font-medium">{receipt.age}</span>
                 <span className="font-medium">{new Date(receipt.receipt_date).toLocaleDateString()}</span>
               </div>
             </div>
             
-            {/* Address, BP, Pulse line - positioned on second dotted line */}
-            <div className="absolute" style={{ top: '340px', left: '450px', right: '10px' }}>
-              <div className="flex items-center justify-between text-sm">
+            {/* Address, BP, Pulse line */}
+            <div className="absolute text-sm" style={{ top: '120mm', left: '60mm', width: '135mm' }}>
+              <div className="flex items-center justify-between gap-4">
                 <span className="font-medium flex-1">{receipt.address}</span>
-                <span className="font-medium w-32">{receipt.bp || '-'}</span>
-                <span className="font-medium w-32">{receipt.pulse || '-'}</span>
+                <span className="font-medium w-24">{receipt.bp || '-'}</span>
+                <span className="font-medium w-24">{receipt.pulse || '-'}</span>
               </div>
             </div>
 
-            {/* Items list - positioned in the center empty space */}
-            <div className="absolute" style={{ top: '400px', left: '350px', right: '20px' }}>
-              <div className="space-y-3">
+            {/* Items list */}
+            <div className="absolute text-sm" style={{ top: '145mm', left: '50mm', width: '145mm' }}>
+              <div className="space-y-2">
                 {receipt.items.map((item, index) => (
-                  <div key={index} className="flex justify-between text-base" style={{ color: '#000000' }}>
-                    <span className="font-semibold">{item.name}</span>
-                    <span className="font-semibold">Qty: {item.quantity}</span>
-                    <span className="font-semibold">₹{item.price.toFixed(2)}</span>
+                  <div key={index} className="flex justify-between gap-4">
+                    <span className="font-semibold flex-1">{item.name}</span>
+                    <span className="font-semibold w-16">Qty: {item.quantity}</span>
+                    <span className="font-semibold w-20 text-right">₹{item.price.toFixed(2)}</span>
                   </div>
                 ))}
               </div>
             </div>
 
             {/* Tax and Total details */}
-            <div className="absolute" style={{ bottom: '150px', right: '100px', width: '300px' }}>
-              <div className="space-y-1 text-sm">
-                <div className="flex justify-between">
+            <div className="absolute text-sm" style={{ bottom: '50mm', right: '30mm', width: '80mm' }}>
+              <div className="space-y-2">
+                <div className="flex justify-between gap-4">
                   <span className="font-medium">Subtotal:</span>
                   <span className="font-medium">₹{receipt.subtotal.toFixed(2)}</span>
                 </div>
-                <div className="flex justify-between">
+                <div className="flex justify-between gap-4">
                   <span className="font-medium">Tax:</span>
                   <span className="font-medium">₹{receipt.tax_amount.toFixed(2)}</span>
                 </div>
-                <div className="flex justify-between border-t border-foreground/20 pt-1">
+                <div className="flex justify-between gap-4 border-t border-foreground/20 pt-2">
                   <span className="font-bold">Total:</span>
                   <span className="font-bold">₹{receipt.total_amount.toFixed(2)}</span>
                 </div>
@@ -178,11 +178,22 @@ const ReceiptDisplay = () => {
       <style>{`
         @media print {
           body {
-            print-color-adjust: exact;
-            -webkit-print-color-adjust: exact;
+            margin: 0;
+            padding: 0;
           }
           .print\\:hidden {
             display: none !important;
+          }
+          .print-bg {
+            display: none !important;
+          }
+          .receipt-print {
+            background: white !important;
+            box-shadow: none !important;
+          }
+          @page {
+            size: A4;
+            margin: 0;
           }
         }
       `}</style>
