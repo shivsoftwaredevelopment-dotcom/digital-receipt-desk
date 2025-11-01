@@ -177,9 +177,11 @@ const ReceiptDisplay = () => {
 
       <style>{`
         @media print {
-          body {
-            margin: 0;
-            padding: 0;
+          html, body {
+            margin: 0 !important;
+            padding: 0 !important;
+            width: 100% !important;
+            height: 100% !important;
           }
           .print\\:hidden {
             display: none !important;
@@ -190,6 +192,12 @@ const ReceiptDisplay = () => {
           .receipt-print {
             background: white !important;
             box-shadow: none !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            max-width: 100% !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            page-break-after: avoid !important;
           }
           @page {
             size: A4;
