@@ -4,6 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Printer, ArrowLeft, LogOut, Download } from "lucide-react";
+import html2canvas from "html2canvas";
+import { jsPDF } from "jspdf";
 import prescriptionTemplate from "@/assets/prescription-template.jpg";
 
 interface ReceiptItem {
@@ -57,8 +59,30 @@ const ReceiptDisplay = () => {
     }
   };
 
-  const handlePrint = () => {
-    window.print();
+  const handlePrint = async () => {
+    const element = document.getElementById("receipt-print-area");
+    if (!element) return;
+    
+    toast.loading("Generating PDF...");
+    try {
+      const canvas = await html2canvas(element, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+      });
+
+      const imgWidth = 210;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      const pdf = new jsPDF("p", "mm", "a4");
+      const imgData = canvas.toDataURL("image/png");
+      pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
+      pdf.save(`receipt-${receipt?.customer_name || "download"}.pdf`);
+      toast.dismiss();
+      toast.success("PDF downloaded!");
+    } catch (err) {
+      toast.dismiss();
+      toast.error("Failed to generate PDF");
+    }
   };
 
   const handleSignOut = async () => {
@@ -117,7 +141,7 @@ const ReceiptDisplay = () => {
         </div>
 
         {/* Receipt container - fixed A4 aspect ratio */}
-        <div className="receipt-container relative mx-auto" style={{ width: '100%', maxWidth: '794px', aspectRatio: '210/297' }}>
+        <div id="receipt-print-area" className="receipt-container relative mx-auto" style={{ width: '100%', maxWidth: '794px', aspectRatio: '210/297' }}>
           {/* Background image - visible on screen, hidden on print */}
           <img
             src={prescriptionTemplate}
