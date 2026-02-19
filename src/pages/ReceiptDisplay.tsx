@@ -3,7 +3,8 @@ import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { Printer, ArrowLeft, LogOut } from "lucide-react";
+import { Printer, ArrowLeft, LogOut, Download } from "lucide-react";
+import prescriptionTemplate from "@/assets/prescription-template.jpg";
 
 interface ReceiptItem {
   name: string;
@@ -89,7 +90,8 @@ const ReceiptDisplay = () => {
   return (
     <div className="min-h-screen bg-background p-4 md:p-8">
       <div className="mx-auto max-w-4xl">
-        <div className="mb-6 flex flex-wrap items-center justify-between gap-4 print:hidden">
+        {/* Navigation buttons - hidden when printing */}
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-4 no-print">
           <div className="flex gap-2">
             <Button variant="outline" onClick={() => navigate("/")}>
               <ArrowLeft className="mr-2 h-4 w-4" />
@@ -105,7 +107,7 @@ const ReceiptDisplay = () => {
           <div className="flex gap-2">
             <Button onClick={handlePrint}>
               <Printer className="mr-2 h-4 w-4" />
-              Print Receipt
+              Print / PDF
             </Button>
             <Button variant="outline" onClick={handleSignOut}>
               <LogOut className="mr-2 h-4 w-4" />
@@ -114,61 +116,72 @@ const ReceiptDisplay = () => {
           </div>
         </div>
 
-        <div className="receipt-print relative mx-auto max-w-4xl" style={{ aspectRatio: '8.5/11' }}>
-          <img 
-            src={new URL('../assets/prescription-template.jpg', import.meta.url).href}
+        {/* Receipt container - fixed A4 aspect ratio */}
+        <div className="receipt-container relative mx-auto" style={{ width: '100%', maxWidth: '794px', aspectRatio: '210/297' }}>
+          {/* Background image - visible on screen, hidden on print */}
+          <img
+            src={prescriptionTemplate}
             alt="Prescription Template"
-            className="absolute inset-0 h-full w-full object-contain"
+            className="print-bg absolute inset-0 h-full w-full object-fill"
           />
-          
-          {/* Overlay text on the template */}
-          <div className="relative h-full w-full p-8">
-            {/* Name, Age, Date line - positioned on first dotted line */}
-            <div className="absolute" style={{ top: '300px', left: '540px', right: '20px' }}>
-              <div className="flex items-center justify-between text-sm">
-                <span className="font-medium">{receipt.customer_name}</span>
-                <span className="font-medium">{receipt.age}</span>
-                <span className="font-medium">{new Date(receipt.receipt_date).toLocaleDateString()}</span>
-              </div>
-            </div>
+
+          {/* Text overlay - all positions in percentage */}
+          <div className="relative h-full w-full" style={{ fontSize: '12px' }}>
             
-            {/* Address, BP, Pulse line - positioned on second dotted line */}
-            <div className="absolute" style={{ top: '340px', left: '450px', right: '10px' }}>
-              <div className="flex items-center justify-between text-sm">
-                <span className="font-medium flex-1">{receipt.address}</span>
-                <span className="font-medium w-32">{receipt.bp || '-'}</span>
-                <span className="font-medium w-32">{receipt.pulse || '-'}</span>
-              </div>
+            {/* Name */}
+            <div className="absolute font-semibold" style={{ top: '26.5%', left: '48%', color: '#000' }}>
+              {receipt.customer_name}
             </div>
 
-            {/* Items list - positioned in the center empty space */}
-            <div className="absolute" style={{ top: '400px', left: '350px', right: '20px' }}>
-              <div className="space-y-3">
-                {receipt.items.map((item, index) => (
-                  <div key={index} className="flex justify-between text-base" style={{ color: '#000000' }}>
-                    <span className="font-semibold">{item.name}</span>
-                    <span className="font-semibold">Qty: {item.quantity}</span>
-                    <span className="font-semibold">₹{item.price.toFixed(2)}</span>
-                  </div>
-                ))}
-              </div>
+            {/* Age */}
+            <div className="absolute font-semibold" style={{ top: '26.5%', left: '79%', color: '#000' }}>
+              {receipt.age}
             </div>
 
-            {/* Tax and Total details */}
-            <div className="absolute" style={{ bottom: '150px', right: '100px', width: '300px' }}>
-              <div className="space-y-1 text-sm">
-                <div className="flex justify-between">
-                  <span className="font-medium">Subtotal:</span>
-                  <span className="font-medium">₹{receipt.subtotal.toFixed(2)}</span>
+            {/* Date */}
+            <div className="absolute font-semibold" style={{ top: '26.5%', left: '88%', color: '#000' }}>
+              {new Date(receipt.receipt_date).toLocaleDateString()}
+            </div>
+
+            {/* Address */}
+            <div className="absolute font-semibold" style={{ top: '30%', left: '48%', color: '#000' }}>
+              {receipt.address}
+            </div>
+
+            {/* BP */}
+            <div className="absolute font-semibold" style={{ top: '30%', left: '75%', color: '#000' }}>
+              {receipt.bp || '-'}
+            </div>
+
+            {/* Pulse */}
+            <div className="absolute font-semibold" style={{ top: '30%', left: '90%', color: '#000' }}>
+              {receipt.pulse || '-'}
+            </div>
+
+            {/* Items */}
+            <div className="absolute" style={{ top: '38%', left: '35%', right: '5%', color: '#000' }}>
+              {receipt.items.map((item, index) => (
+                <div key={index} className="flex justify-between font-semibold mb-2" style={{ fontSize: '13px' }}>
+                  <span style={{ width: '50%' }}>{item.name}</span>
+                  <span style={{ width: '20%', textAlign: 'center' }}>Qty: {item.quantity}</span>
+                  <span style={{ width: '30%', textAlign: 'right' }}>₹{item.price.toFixed(2)}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="font-medium">Tax:</span>
-                  <span className="font-medium">₹{receipt.tax_amount.toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between border-t border-foreground/20 pt-1">
-                  <span className="font-bold">Total:</span>
-                  <span className="font-bold">₹{receipt.total_amount.toFixed(2)}</span>
-                </div>
+              ))}
+            </div>
+
+            {/* Subtotal, Tax, Total */}
+            <div className="absolute" style={{ bottom: '18%', left: '35%', width: '30%', color: '#000' }}>
+              <div className="flex justify-between font-semibold mb-1">
+                <span>Subtotal:</span>
+                <span>₹{receipt.subtotal.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between font-semibold mb-1">
+                <span>Tax:</span>
+                <span>₹{receipt.tax_amount.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between font-bold border-t border-black pt-1">
+                <span>Total:</span>
+                <span>₹{receipt.total_amount.toFixed(2)}</span>
               </div>
             </div>
           </div>
@@ -177,12 +190,39 @@ const ReceiptDisplay = () => {
 
       <style>{`
         @media print {
-          body {
-            print-color-adjust: exact;
-            -webkit-print-color-adjust: exact;
+          @page {
+            size: A4;
+            margin: 0;
           }
-          .print\\:hidden {
+          html, body {
+            margin: 0 !important;
+            padding: 0 !important;
+            width: 210mm;
+            height: 297mm;
+          }
+          .no-print {
             display: none !important;
+          }
+          .min-h-screen {
+            min-height: auto !important;
+            padding: 0 !important;
+            background: white !important;
+          }
+          .mx-auto {
+            max-width: none !important;
+            margin: 0 !important;
+          }
+          /* Hide background image on print - only text prints */
+          .print-bg {
+            display: none !important;
+          }
+          /* Make receipt fill entire page */
+          .receipt-container {
+            width: 210mm !important;
+            height: 297mm !important;
+            max-width: none !important;
+            margin: 0 !important;
+            page-break-after: avoid;
           }
         }
       `}</style>
