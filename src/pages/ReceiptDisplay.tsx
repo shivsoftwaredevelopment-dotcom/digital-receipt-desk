@@ -198,11 +198,9 @@ const ReceiptDisplay = () => {
             max-width: none !important;
             margin: 0 !important;
           }
-          /* Show background image on print */
+          /* Hide background image on print - only text prints */
           .print-bg {
-            display: block !important;
-            -webkit-print-color-adjust: exact;
-            print-color-adjust: exact;
+            display: none !important;
           }
           /* Make receipt fill entire page */
           .receipt-container {
