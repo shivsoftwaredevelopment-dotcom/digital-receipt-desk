@@ -129,32 +129,32 @@ const ReceiptDisplay = () => {
           <div className="relative h-full w-full" style={{ fontSize: '12px' }}>
             
             {/* Name */}
-            <div className="absolute font-semibold" style={{ top: '26.5%', left: '48%', color: '#000' }}>
+            <div className="absolute font-semibold" style={{ top: '29.5%', left: '48%', color: '#000' }}>
               {receipt.customer_name}
             </div>
 
             {/* Age */}
-            <div className="absolute font-semibold" style={{ top: '26.5%', left: '79%', color: '#000' }}>
+            <div className="absolute font-semibold" style={{ top: '29.5%', left: '79%', color: '#000' }}>
               {receipt.age}
             </div>
 
             {/* Date */}
-            <div className="absolute font-semibold" style={{ top: '26.5%', left: '88%', color: '#000' }}>
+            <div className="absolute font-semibold" style={{ top: '29.5%', left: '88%', color: '#000' }}>
               {new Date(receipt.receipt_date).toLocaleDateString('en-GB')}
             </div>
 
             {/* Address */}
-            <div className="absolute font-semibold" style={{ top: '30%', left: '48%', color: '#000' }}>
+            <div className="absolute font-semibold" style={{ top: '32%', left: '48%', color: '#000' }}>
               {receipt.address}
             </div>
 
             {/* BP */}
-            <div className="absolute font-semibold" style={{ top: '30%', left: '75%', color: '#000' }}>
+            <div className="absolute font-semibold" style={{ top: '32%', left: '75%', color: '#000' }}>
               {receipt.bp || '-'}
             </div>
 
             {/* Pulse */}
-            <div className="absolute font-semibold" style={{ top: '30%', left: '90%', color: '#000' }}>
+            <div className="absolute font-semibold" style={{ top: '32%', left: '90%', color: '#000' }}>
               {receipt.pulse || '-'}
             </div>
 
