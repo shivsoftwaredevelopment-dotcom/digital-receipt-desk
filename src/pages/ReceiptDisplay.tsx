@@ -164,7 +164,7 @@ const ReceiptDisplay = () => {
 
             {/* Date */}
             <div className="absolute font-semibold" style={{ top: '26.5%', left: '88%', color: '#000' }}>
-              {new Date(receipt.receipt_date).toLocaleDateString()}
+              {new Date(receipt.receipt_date).toLocaleDateString('en-GB')}
             </div>
 
             {/* Address */}
