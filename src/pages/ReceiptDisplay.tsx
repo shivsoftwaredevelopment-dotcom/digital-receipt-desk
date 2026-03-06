@@ -194,7 +194,7 @@ const ReceiptDisplay = () => {
             </div>
 
             {/* Subtotal, Tax, Total */}
-            <div className="absolute" style={{ bottom: '18%', left: '35%', width: '30%', color: '#000' }}>
+            {/* <div className="absolute" style={{ bottom: '18%', left: '35%', width: '30%', color: '#000' }}>
               <div className="flex justify-between font-semibold mb-1">
                 <span>Subtotal:</span>
                 <span>₹{receipt.subtotal.toFixed(2)}</span>
@@ -209,8 +209,8 @@ const ReceiptDisplay = () => {
               </div>
             </div>
           </div>
-        </div>
-      </div>
+        </div> */}
+      {/* </div> */}
 
       <style>{`
         @media print {
