@@ -3,9 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { Printer, ArrowLeft, LogOut, Download } from "lucide-react";
-import html2canvas from "html2canvas";
-import { jsPDF } from "jspdf";
+import { Printer, ArrowLeft, LogOut } from "lucide-react";
 import prescriptionTemplate from "@/assets/prescription-template.jpg";
 
 interface ReceiptItem {
@@ -59,30 +57,8 @@ const ReceiptDisplay = () => {
     }
   };
 
-  const handlePrint = async () => {
-    const element = document.getElementById("receipt-print-area");
-    if (!element) return;
-    
-    toast.loading("Generating PDF...");
-    try {
-      const canvas = await html2canvas(element, {
-        scale: 2,
-        useCORS: true,
-        logging: false,
-      });
-
-      const imgWidth = 210;
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      const pdf = new jsPDF("p", "mm", "a4");
-      const imgData = canvas.toDataURL("image/png");
-      pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
-      pdf.save(`receipt-${receipt?.customer_name || "download"}.pdf`);
-      toast.dismiss();
-      toast.success("PDF downloaded!");
-    } catch (err) {
-      toast.dismiss();
-      toast.error("Failed to generate PDF");
-    }
+  const handlePrint = () => {
+    window.print();
   };
 
   const handleSignOut = async () => {
@@ -131,7 +107,7 @@ const ReceiptDisplay = () => {
           <div className="flex gap-2">
             <Button onClick={handlePrint}>
               <Printer className="mr-2 h-4 w-4" />
-              Print / PDF
+              Print
             </Button>
             <Button variant="outline" onClick={handleSignOut}>
               <LogOut className="mr-2 h-4 w-4" />
@@ -222,9 +198,11 @@ const ReceiptDisplay = () => {
             max-width: none !important;
             margin: 0 !important;
           }
-          /* Hide background image on print - only text prints */
+          /* Show background image on print */
           .print-bg {
-            display: none !important;
+            display: block !important;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
           }
           /* Make receipt fill entire page */
           .receipt-container {
