@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import { Plus, Trash2, LogOut, FileText, History, User } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 import { z } from "zod";
 import {
   Select,
@@ -57,6 +58,8 @@ const ReceiptForm = () => {
   ]);
   const [taxRate, setTaxRate] = useState(18);
   const [loading, setLoading] = useState(false);
+  const [showItems, setShowItems] = useState(true);
+  const [showSummary, setShowSummary] = useState(true);
 
   const addItem = () => {
     setItems([...items, { id: Date.now().toString(), name: "", quantity: 1, price: 0 }]);
@@ -301,105 +304,117 @@ const ReceiptForm = () => {
                   <CardTitle>Items</CardTitle>
                   <CardDescription>Add items to the receipt</CardDescription>
                 </div>
-                <Button type="button" onClick={addItem} size="sm">
-                  <Plus className="mr-2 h-4 w-4" />
-                  Add Item
-                </Button>
+                <div className="flex items-center gap-3">
+                  <Switch checked={showItems} onCheckedChange={setShowItems} />
+                  {showItems && (
+                    <Button type="button" onClick={addItem} size="sm">
+                      <Plus className="mr-2 h-4 w-4" />
+                      Add Item
+                    </Button>
+                  )}
+                </div>
               </div>
             </CardHeader>
-            <CardContent className="space-y-4">
-              {items.map((item, index) => (
-                <div key={item.id} className="rounded-lg border p-4">
-                  <div className="mb-2 flex items-center justify-between">
-                    <span className="text-sm font-medium">Item {index + 1}</span>
-                    {items.length > 1 && (
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => removeItem(item.id)}
-                      >
-                        <Trash2 className="h-4 w-4 text-destructive" />
-                      </Button>
-                    )}
-                  </div>
-                  <div className="grid gap-4 md:grid-cols-3">
-                    <div className="space-y-2">
-                      <Label>Item Name *</Label>
-                      <Input
-                        value={item.name}
-                        onChange={(e) => updateItem(item.id, "name", e.target.value)}
-                        placeholder="Product name"
-                        maxLength={100}
-                        required
-                      />
+            {showItems && (
+              <CardContent className="space-y-4">
+                {items.map((item, index) => (
+                  <div key={item.id} className="rounded-lg border p-4">
+                    <div className="mb-2 flex items-center justify-between">
+                      <span className="text-sm font-medium">Item {index + 1}</span>
+                      {items.length > 1 && (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => removeItem(item.id)}
+                        >
+                          <Trash2 className="h-4 w-4 text-destructive" />
+                        </Button>
+                      )}
                     </div>
-                    <div className="space-y-2">
-                      <Label>Quantity *</Label>
-                      <Input
-                        type="number"
-                        min="1"
-                        max="10000"
-                        value={item.quantity}
-                        onChange={(e) => updateItem(item.id, "quantity", Number(e.target.value))}
-                        required
-                      />
+                    <div className="grid gap-4 md:grid-cols-3">
+                      <div className="space-y-2">
+                        <Label>Item Name *</Label>
+                        <Input
+                          value={item.name}
+                          onChange={(e) => updateItem(item.id, "name", e.target.value)}
+                          placeholder="Product name"
+                          maxLength={100}
+                          required
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Quantity *</Label>
+                        <Input
+                          type="number"
+                          min="1"
+                          max="10000"
+                          value={item.quantity}
+                          onChange={(e) => updateItem(item.id, "quantity", Number(e.target.value))}
+                          required
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Price (₹) *</Label>
+                        <Input
+                          type="number"
+                          min="0"
+                          step="0.01"
+                          max="1000000"
+                          value={item.price}
+                          onChange={(e) => updateItem(item.id, "price", Number(e.target.value))}
+                          required
+                        />
+                      </div>
                     </div>
-                    <div className="space-y-2">
-                      <Label>Price (₹) *</Label>
-                      <Input
-                        type="number"
-                        min="0"
-                        step="0.01"
-                        max="1000000"
-                        value={item.price}
-                        onChange={(e) => updateItem(item.id, "price", Number(e.target.value))}
-                        required
-                      />
+                    <div className="mt-2 text-right">
+                      <span className="text-sm text-muted-foreground">
+                        Total: ₹{(item.quantity * item.price).toFixed(2)}
+                      </span>
                     </div>
                   </div>
-                  <div className="mt-2 text-right">
-                    <span className="text-sm text-muted-foreground">
-                      Total: ₹{(item.quantity * item.price).toFixed(2)}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </CardContent>
+                ))}
+              </CardContent>
+            )}
           </Card>
 
           <Card className="mb-6 shadow-medium">
             <CardHeader>
-              <CardTitle>Summary</CardTitle>
+              <div className="flex items-center justify-between">
+                <CardTitle>Summary</CardTitle>
+                <Switch checked={showSummary} onCheckedChange={setShowSummary} />
+              </div>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="taxRate">Tax Rate (%)</Label>
-                <Input
-                  id="taxRate"
-                  type="number"
-                  min="0"
-                  max="100"
-                  step="0.01"
-                  value={taxRate}
-                  onChange={(e) => setTaxRate(Number(e.target.value))}
-                />
-              </div>
-              <div className="space-y-2 rounded-lg bg-muted p-4">
-                <div className="flex justify-between text-sm">
-                  <span>Subtotal:</span>
-                  <span>₹{calculateSubtotal().toFixed(2)}</span>
+            {showSummary && (
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="taxRate">Tax Rate (%)</Label>
+                  <Input
+                    id="taxRate"
+                    type="number"
+                    min="0"
+                    max="100"
+                    step="0.01"
+                    value={taxRate}
+                    onChange={(e) => setTaxRate(Number(e.target.value))}
+                  />
                 </div>
-                <div className="flex justify-between text-sm">
-                  <span>Tax ({taxRate}%):</span>
-                  <span>₹{calculateTax().toFixed(2)}</span>
+                <div className="space-y-2 rounded-lg bg-muted p-4">
+                  <div className="flex justify-between text-sm">
+                    <span>Subtotal:</span>
+                    <span>₹{calculateSubtotal().toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span>Tax ({taxRate}%):</span>
+                    <span>₹{calculateTax().toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between border-t pt-2 font-semibold">
+                    <span>Total:</span>
+                    <span className="text-primary">₹{calculateTotal().toFixed(2)}</span>
+                  </div>
                 </div>
-                <div className="flex justify-between border-t pt-2 font-semibold">
-                  <span>Total:</span>
-                  <span className="text-primary">₹{calculateTotal().toFixed(2)}</span>
-                </div>
-              </div>
-            </CardContent>
+              </CardContent>
+            )}
           </Card>
 
           <Button type="submit" size="lg" className="w-full" disabled={loading}>
