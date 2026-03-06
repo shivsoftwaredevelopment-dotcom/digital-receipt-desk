@@ -144,6 +144,18 @@ const ReceiptForm = () => {
 
       if (error) throw error;
 
+      // Auto-save contact details
+      await supabase
+        .from("contacts")
+        .upsert(
+          {
+            user_id: user.id,
+            customer_name: validated.customerName,
+            mobile_number: validated.mobileNumber,
+          },
+          { onConflict: "user_id,mobile_number" }
+        );
+
       toast.success("Receipt created successfully!");
       navigate(`/receipt/${data.id}`);
     } catch (error) {

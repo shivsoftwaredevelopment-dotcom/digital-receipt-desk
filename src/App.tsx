@@ -11,6 +11,7 @@ import ReceiptHistory from "./pages/ReceiptHistory";
 import Profile from "./pages/Profile";
 import Admin from "./pages/Admin";
 import AdminUserReceipts from "./pages/AdminUserReceipts";
+import Contacts from "./pages/Contacts";
 import ProtectedRoute from "./components/ProtectedRoute";
 import NotFound from "./pages/NotFound";
 
@@ -77,6 +78,14 @@ const App = () => (
             element={
               <ProtectedRoute>
                 <AdminUserReceipts />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/contacts"
+            element={
+              <ProtectedRoute>
+                <Contacts />
               </ProtectedRoute>
             }
           />
