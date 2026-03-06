@@ -194,23 +194,9 @@ const ReceiptDisplay = () => {
             </div>
 
             {/* Subtotal, Tax, Total */}
-            {/* <div className="absolute" style={{ bottom: '18%', left: '35%', width: '30%', color: '#000' }}>
-              <div className="flex justify-between font-semibold mb-1">
-                <span>Subtotal:</span>
-                <span>₹{receipt.subtotal.toFixed(2)}</span>
-              </div>
-              <div className="flex justify-between font-semibold mb-1">
-                <span>Tax:</span>
-                <span>₹{receipt.tax_amount.toFixed(2)}</span>
-              </div>
-              <div className="flex justify-between font-bold border-t border-black pt-1">
-                <span>Total:</span>
-                <span>₹{receipt.total_amount.toFixed(2)}</span>
-              </div>
-            </div>
           </div>
-        </div> */}
-      {/* </div> */}
+        </div>
+      </div>
 
       <style>{`
         @media print {
