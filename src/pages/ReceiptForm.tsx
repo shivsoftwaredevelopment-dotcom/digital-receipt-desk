@@ -32,8 +32,9 @@ const receiptSchema = z.object({
   pulse: z.string().trim().optional(),
   branch: z.string().min(1, "Branch required"),
   date: z.string().min(1, "Date required"),
-  items: z.array(itemSchema).min(1, "Add at least one item"),
+  items: z.array(itemSchema).min(0),
   taxRate: z.number().min(0).max(100),
+  showItems: z.boolean(),
 });
 
 interface Item {
@@ -104,8 +105,9 @@ const ReceiptForm = () => {
         pulse,
         branch,
         date,
-        items: items.map(({ id, ...item }) => item),
-        taxRate,
+        items: showItems ? items.map(({ id, ...item }) => item) : [],
+        taxRate: showSummary ? taxRate : 0,
+        showItems,
       });
 
       setLoading(true);
