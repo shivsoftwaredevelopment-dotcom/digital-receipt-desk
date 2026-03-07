@@ -107,7 +107,7 @@ const Contacts = () => {
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
   }))].sort().reverse();
 
-  // Filter contacts based on receipts for branch/month
+  // Filter contacts based on receipts for branch/month/date range
   const getFilteredExportData = () => {
     let filtered = receipts;
     if (selectedBranch !== "all") {
@@ -119,6 +119,12 @@ const Contacts = () => {
         const m = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
         return m === selectedMonth;
       });
+    }
+    if (dateFrom) {
+      filtered = filtered.filter((r) => r.receipt_date >= dateFrom);
+    }
+    if (dateTo) {
+      filtered = filtered.filter((r) => r.receipt_date <= dateTo);
     }
     // Deduplicate by mobile number
     const seen = new Set<string>();
