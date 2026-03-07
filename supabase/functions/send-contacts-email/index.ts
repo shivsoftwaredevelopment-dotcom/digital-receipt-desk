@@ -80,10 +80,15 @@ async function sendEmailViaSMTP(
 function buildEmailHTML(
   contacts: ContactData[],
   branchFilter: string,
-  monthFilter: string
+  monthFilter: string,
+  dateFrom?: string,
+  dateTo?: string,
 ): string {
   const branchLabel = branchFilter === "all" ? "All Branches" : branchFilter;
   const monthLabel = monthFilter === "all" ? "All Months" : monthFilter;
+  const dateLabel = (dateFrom && dateFrom !== "all") || (dateTo && dateTo !== "all")
+    ? `${dateFrom && dateFrom !== "all" ? dateFrom : "Start"} to ${dateTo && dateTo !== "all" ? dateTo : "Present"}`
+    : "";
 
   const rows = contacts
     .map(
