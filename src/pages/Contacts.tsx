@@ -333,6 +333,29 @@ const Contacts = () => {
               </div>
             </div>
 
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-sm font-medium text-foreground flex items-center gap-1">
+                  <CalendarDays className="h-3.5 w-3.5" /> From Date
+                </label>
+                <Input
+                  type="date"
+                  value={dateFrom}
+                  onChange={(e) => setDateFrom(e.target.value)}
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-foreground flex items-center gap-1">
+                  <CalendarDays className="h-3.5 w-3.5" /> To Date
+                </label>
+                <Input
+                  type="date"
+                  value={dateTo}
+                  onChange={(e) => setDateTo(e.target.value)}
+                />
+              </div>
+            </div>
+
             <div className="rounded-lg border p-3">
               <p className="text-sm text-muted-foreground mb-2">
                 {exportData.length} contacts found
