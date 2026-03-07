@@ -112,6 +112,10 @@ const Dashboard = () => {
               <FileText className="mr-2 h-4 w-4" />
               History
             </Button>
+            <Button variant="outline" onClick={() => navigate("/contacts")}>
+              <Users className="mr-2 h-4 w-4" />
+              Contacts
+            </Button>
             <Button variant="outline" onClick={() => navigate("/profile")}>
               <User className="mr-2 h-4 w-4" />
               Profile
