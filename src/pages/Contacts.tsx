@@ -297,7 +297,7 @@ const Contacts = () => {
           <DialogHeader>
             <DialogTitle>Export Contacts</DialogTitle>
             <DialogDescription>
-              Filter by branch and month, then download CSV or send to your email.
+              Filter by branch, month, or custom date range, then download CSV or send to your email.
             </DialogDescription>
           </DialogHeader>
 
