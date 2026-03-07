@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import {
   ArrowLeft, LogOut, Search, Trash2, Users, Phone, User,
-  Download, Mail, FileSpreadsheet
+  Download, Mail, FileSpreadsheet, CalendarDays
 } from "lucide-react";
 import {
   Dialog,
