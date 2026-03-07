@@ -106,7 +106,7 @@ function buildEmailHTML(
     <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto">
       <div style="background:#1a1a1a;color:#ffffff;padding:20px;border-radius:8px 8px 0 0">
         <h2 style="margin:0">Customer Contact Report</h2>
-        <p style="margin:4px 0 0;opacity:0.8">Branch: ${branchLabel} | Period: ${monthLabel}</p>
+        <p style="margin:4px 0 0;opacity:0.8">Branch: ${branchLabel} | Period: ${monthLabel}${dateLabel ? ` | Date: ${dateLabel}` : ""}</p>
       </div>
       <div style="padding:20px;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 8px 8px">
         <p style="color:#6b7280">Total Contacts: <strong>${contacts.length}</strong></p>
