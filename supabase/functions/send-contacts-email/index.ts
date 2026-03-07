@@ -80,10 +80,15 @@ async function sendEmailViaSMTP(
 function buildEmailHTML(
   contacts: ContactData[],
   branchFilter: string,
-  monthFilter: string
+  monthFilter: string,
+  dateFrom?: string,
+  dateTo?: string,
 ): string {
   const branchLabel = branchFilter === "all" ? "All Branches" : branchFilter;
   const monthLabel = monthFilter === "all" ? "All Months" : monthFilter;
+  const dateLabel = (dateFrom && dateFrom !== "all") || (dateTo && dateTo !== "all")
+    ? `${dateFrom && dateFrom !== "all" ? dateFrom : "Start"} to ${dateTo && dateTo !== "all" ? dateTo : "Present"}`
+    : "";
 
   const rows = contacts
     .map(
@@ -101,7 +106,7 @@ function buildEmailHTML(
     <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto">
       <div style="background:#1a1a1a;color:#ffffff;padding:20px;border-radius:8px 8px 0 0">
         <h2 style="margin:0">Customer Contact Report</h2>
-        <p style="margin:4px 0 0;opacity:0.8">Branch: ${branchLabel} | Period: ${monthLabel}</p>
+        <p style="margin:4px 0 0;opacity:0.8">Branch: ${branchLabel} | Period: ${monthLabel}${dateLabel ? ` | Date: ${dateLabel}` : ""}</p>
       </div>
       <div style="padding:20px;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 8px 8px">
         <p style="color:#6b7280">Total Contacts: <strong>${contacts.length}</strong></p>
@@ -129,7 +134,7 @@ serve(async (req) => {
   }
 
   try {
-    const { to_email, contacts, branch_filter, month_filter } = await req.json();
+    const { to_email, contacts, branch_filter, month_filter, date_from, date_to } = await req.json();
 
     if (!to_email || !contacts || contacts.length === 0) {
       throw new Error("Missing required fields");
@@ -137,9 +142,12 @@ serve(async (req) => {
 
     const branchLabel = branch_filter === "all" ? "All Branches" : branch_filter;
     const monthLabel = month_filter === "all" ? "All Months" : month_filter;
-    const subject = `Customer Contacts - ${branchLabel} - ${monthLabel}`;
+    const dateLabel = (date_from && date_from !== "all") || (date_to && date_to !== "all")
+      ? ` (${date_from !== "all" ? date_from : "Start"} to ${date_to !== "all" ? date_to : "Present"})`
+      : "";
+    const subject = `Customer Contacts - ${branchLabel} - ${monthLabel}${dateLabel}`;
 
-    const html = buildEmailHTML(contacts, branch_filter, month_filter);
+    const html = buildEmailHTML(contacts, branch_filter, month_filter, date_from, date_to);
 
     await sendEmailViaSMTP(to_email, subject, html);
 

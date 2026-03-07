@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import {
   ArrowLeft, LogOut, Search, Trash2, Users, Phone, User,
-  Download, Mail, FileSpreadsheet
+  Download, Mail, FileSpreadsheet, CalendarDays
 } from "lucide-react";
 import {
   Dialog,
@@ -48,6 +48,8 @@ const Contacts = () => {
   const [selectedBranch, setSelectedBranch] = useState("all");
   const [selectedMonth, setSelectedMonth] = useState("all");
   const [sending, setSending] = useState(false);
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
 
   useEffect(() => {
     fetchContacts();
@@ -105,7 +107,7 @@ const Contacts = () => {
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
   }))].sort().reverse();
 
-  // Filter contacts based on receipts for branch/month
+  // Filter contacts based on receipts for branch/month/date range
   const getFilteredExportData = () => {
     let filtered = receipts;
     if (selectedBranch !== "all") {
@@ -117,6 +119,12 @@ const Contacts = () => {
         const m = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
         return m === selectedMonth;
       });
+    }
+    if (dateFrom) {
+      filtered = filtered.filter((r) => r.receipt_date >= dateFrom);
+    }
+    if (dateTo) {
+      filtered = filtered.filter((r) => r.receipt_date <= dateTo);
     }
     // Deduplicate by mobile number
     const seen = new Set<string>();
@@ -178,6 +186,8 @@ const Contacts = () => {
           })),
           branch_filter: selectedBranch,
           month_filter: selectedMonth,
+          date_from: dateFrom || "all",
+          date_to: dateTo || "all",
         },
       });
 
@@ -289,7 +299,7 @@ const Contacts = () => {
           <DialogHeader>
             <DialogTitle>Export Contacts</DialogTitle>
             <DialogDescription>
-              Filter by branch and month, then download CSV or send to your email.
+              Filter by branch, month, or custom date range, then download CSV or send to your email.
             </DialogDescription>
           </DialogHeader>
 
@@ -322,6 +332,29 @@ const Contacts = () => {
                     ))}
                   </SelectContent>
                 </Select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-sm font-medium text-foreground flex items-center gap-1">
+                  <CalendarDays className="h-3.5 w-3.5" /> From Date
+                </label>
+                <Input
+                  type="date"
+                  value={dateFrom}
+                  onChange={(e) => setDateFrom(e.target.value)}
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-foreground flex items-center gap-1">
+                  <CalendarDays className="h-3.5 w-3.5" /> To Date
+                </label>
+                <Input
+                  type="date"
+                  value={dateTo}
+                  onChange={(e) => setDateTo(e.target.value)}
+                />
               </div>
             </div>
 
