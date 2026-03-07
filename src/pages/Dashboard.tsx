@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
-import { Plus, FileText, User, LogOut, TrendingUp } from "lucide-react";
+import { Plus, FileText, User, LogOut, TrendingUp, Users } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 
@@ -111,6 +111,10 @@ const Dashboard = () => {
             <Button variant="outline" onClick={() => navigate("/history")}>
               <FileText className="mr-2 h-4 w-4" />
               History
+            </Button>
+            <Button variant="outline" onClick={() => navigate("/contacts")}>
+              <Users className="mr-2 h-4 w-4" />
+              Contacts
             </Button>
             <Button variant="outline" onClick={() => navigate("/profile")}>
               <User className="mr-2 h-4 w-4" />
