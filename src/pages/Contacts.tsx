@@ -186,6 +186,8 @@ const Contacts = () => {
           })),
           branch_filter: selectedBranch,
           month_filter: selectedMonth,
+          date_from: dateFrom || "all",
+          date_to: dateTo || "all",
         },
       });
 
