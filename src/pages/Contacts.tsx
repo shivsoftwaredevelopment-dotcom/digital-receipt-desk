@@ -48,6 +48,8 @@ const Contacts = () => {
   const [selectedBranch, setSelectedBranch] = useState("all");
   const [selectedMonth, setSelectedMonth] = useState("all");
   const [sending, setSending] = useState(false);
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
 
   useEffect(() => {
     fetchContacts();
