@@ -134,7 +134,7 @@ serve(async (req) => {
   }
 
   try {
-    const { to_email, contacts, branch_filter, month_filter } = await req.json();
+    const { to_email, contacts, branch_filter, month_filter, date_from, date_to } = await req.json();
 
     if (!to_email || !contacts || contacts.length === 0) {
       throw new Error("Missing required fields");
@@ -142,9 +142,12 @@ serve(async (req) => {
 
     const branchLabel = branch_filter === "all" ? "All Branches" : branch_filter;
     const monthLabel = month_filter === "all" ? "All Months" : month_filter;
-    const subject = `Customer Contacts - ${branchLabel} - ${monthLabel}`;
+    const dateLabel = (date_from && date_from !== "all") || (date_to && date_to !== "all")
+      ? ` (${date_from !== "all" ? date_from : "Start"} to ${date_to !== "all" ? date_to : "Present"})`
+      : "";
+    const subject = `Customer Contacts - ${branchLabel} - ${monthLabel}${dateLabel}`;
 
-    const html = buildEmailHTML(contacts, branch_filter, month_filter);
+    const html = buildEmailHTML(contacts, branch_filter, month_filter, date_from, date_to);
 
     await sendEmailViaSMTP(to_email, subject, html);
 
