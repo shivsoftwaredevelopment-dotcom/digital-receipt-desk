@@ -394,6 +394,10 @@ const Admin = () => {
                 onCheckedChange={toggleMaintenanceMode}
               />
             </div>
+            <Button variant="destructive" onClick={() => setResetDialogOpen(true)}>
+              <RotateCcw className="mr-2 h-4 w-4" />
+              Reset Data
+            </Button>
             <Button variant="outline" onClick={() => setTransferDialogOpen(true)}>
               <ArrowRightLeft className="mr-2 h-4 w-4" />
               Transfer Data
