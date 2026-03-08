@@ -327,10 +327,16 @@ const Admin = () => {
             <Shield className="h-8 w-8 text-primary" />
             <h1 className="text-3xl font-bold text-primary">Admin Panel</h1>
           </div>
-          <Button variant="outline" onClick={() => navigate("/")}>
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Dashboard
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={() => setTransferDialogOpen(true)}>
+              <ArrowRightLeft className="mr-2 h-4 w-4" />
+              Transfer Data
+            </Button>
+            <Button variant="outline" onClick={() => navigate("/")}>
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Dashboard
+            </Button>
+          </div>
         </div>
 
         <Tabs defaultValue="users" className="space-y-6">
