@@ -220,6 +220,33 @@ const Admin = () => {
     }
   };
 
+  const handleTransferData = async () => {
+    if (!transferFromUser || !transferToUser) {
+      toast.error("दोनों users select करें");
+      return;
+    }
+    if (transferFromUser === transferToUser) {
+      toast.error("Source और Target user अलग होने चाहिए");
+      return;
+    }
+    setTransferring(true);
+    try {
+      const result = await callAdminAction({
+        action: "transfer_data",
+        fromUserId: transferFromUser,
+        toUserId: transferToUser,
+      });
+      toast.success(result.message);
+      setTransferDialogOpen(false);
+      setTransferFromUser("");
+      setTransferToUser("");
+      fetchUsers();
+    } catch (error: any) {
+      toast.error(error.message);
+    } finally {
+      setTransferring(false);
+    }
+  };
   const fetchTemplates = async () => {
     const { data } = await supabase
       .from("receipt_templates")
