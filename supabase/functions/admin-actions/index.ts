@@ -39,7 +39,8 @@ serve(async (req) => {
 
     if (!roleData) throw new Error("Access denied - Admin only");
 
-    const { action, userId, email, password } = await req.json();
+    const body = await req.json();
+    const { action, userId, email, password } = body;
 
     switch (action) {
       case "delete_user": {
@@ -119,7 +120,6 @@ serve(async (req) => {
       }
 
       case "generate_link": {
-        // Generate a magic link for admin to login as user
         const { data, error } = await supabaseAdmin.auth.admin.generateLink({
           type: "magiclink",
           email: email,
@@ -129,8 +129,41 @@ serve(async (req) => {
         return new Response(
           JSON.stringify({
             success: true,
-            // Return the hashed token properties for client-side session
             properties: data.properties,
+          }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      case "transfer_data": {
+        const sourceId = body.fromUserId;
+        const targetId = body.toUserId;
+
+        if (!sourceId || !targetId) throw new Error("Both source and target user IDs are required");
+        if (sourceId === targetId) throw new Error("Source and target users must be different");
+
+        // Transfer receipts
+        const { data: receiptData, error: receiptError } = await supabaseAdmin
+          .from("receipts")
+          .update({ user_id: targetId })
+          .eq("user_id", sourceId)
+          .select("id");
+        if (receiptError) throw receiptError;
+
+        // Transfer contacts
+        const { data: contactData, error: contactError } = await supabaseAdmin
+          .from("contacts")
+          .update({ user_id: targetId })
+          .eq("user_id", sourceId)
+          .select("id");
+        if (contactError) throw contactError;
+
+        return new Response(
+          JSON.stringify({
+            success: true,
+            message: `Transferred ${receiptData?.length || 0} receipts and ${contactData?.length || 0} contacts successfully`,
+            receipts_transferred: receiptData?.length || 0,
+            contacts_transferred: contactData?.length || 0,
           }),
           { headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );

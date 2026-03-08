@@ -8,10 +8,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { ArrowLeft, Shield, Users, FileText, Palette, Trash2, Save, Edit, Ban, Unlock, Eye, LogIn } from "lucide-react";
+import { ArrowLeft, Shield, Users, FileText, Palette, Trash2, Save, Edit, Ban, Unlock, Eye, LogIn, ArrowRightLeft } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface User {
   id: string;
@@ -56,6 +57,10 @@ const Admin = () => {
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [viewingUser, setViewingUser] = useState<User | null>(null);
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
+  const [transferDialogOpen, setTransferDialogOpen] = useState(false);
+  const [transferFromUser, setTransferFromUser] = useState<string>("");
+  const [transferToUser, setTransferToUser] = useState<string>("");
+  const [transferring, setTransferring] = useState(false);
 
   useEffect(() => {
     checkAdminAndFetchData();
@@ -215,6 +220,33 @@ const Admin = () => {
     }
   };
 
+  const handleTransferData = async () => {
+    if (!transferFromUser || !transferToUser) {
+      toast.error("दोनों users select करें");
+      return;
+    }
+    if (transferFromUser === transferToUser) {
+      toast.error("Source और Target user अलग होने चाहिए");
+      return;
+    }
+    setTransferring(true);
+    try {
+      const result = await callAdminAction({
+        action: "transfer_data",
+        fromUserId: transferFromUser,
+        toUserId: transferToUser,
+      });
+      toast.success(result.message);
+      setTransferDialogOpen(false);
+      setTransferFromUser("");
+      setTransferToUser("");
+      fetchUsers();
+    } catch (error: any) {
+      toast.error(error.message);
+    } finally {
+      setTransferring(false);
+    }
+  };
   const fetchTemplates = async () => {
     const { data } = await supabase
       .from("receipt_templates")
@@ -295,10 +327,16 @@ const Admin = () => {
             <Shield className="h-8 w-8 text-primary" />
             <h1 className="text-3xl font-bold text-primary">Admin Panel</h1>
           </div>
-          <Button variant="outline" onClick={() => navigate("/")}>
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Dashboard
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={() => setTransferDialogOpen(true)}>
+              <ArrowRightLeft className="mr-2 h-4 w-4" />
+              Transfer Data
+            </Button>
+            <Button variant="outline" onClick={() => navigate("/")}>
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Dashboard
+            </Button>
+          </div>
         </div>
 
         <Tabs defaultValue="users" className="space-y-6">
@@ -577,6 +615,67 @@ const Admin = () => {
                     </div>
                   </div>
                 )}
+              </DialogContent>
+            </Dialog>
+
+            {/* Transfer Data Dialog */}
+            <Dialog open={transferDialogOpen} onOpenChange={setTransferDialogOpen}>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Transfer User Data</DialogTitle>
+                  <DialogDescription>
+                    एक user का सारा data (receipts + contacts) दूसरे user को transfer करें। यह action irreversible है।
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4 py-4">
+                  <div className="space-y-2">
+                    <Label>Source User (जिसका data transfer होगा)</Label>
+                    <Select value={transferFromUser} onValueChange={setTransferFromUser}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Source user select करें" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {users.map((u) => (
+                          <SelectItem key={u.id} value={u.id}>
+                            {u.full_name || u.email} ({u.receipt_count} receipts)
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Target User (जिसको data मिलेगा)</Label>
+                    <Select value={transferToUser} onValueChange={setTransferToUser}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Target user select करें" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {users.filter((u) => u.id !== transferFromUser).map((u) => (
+                          <SelectItem key={u.id} value={u.id}>
+                            {u.full_name || u.email} ({u.receipt_count} receipts)
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  {transferFromUser && transferToUser && (
+                    <div className="rounded-md border border-destructive/50 bg-destructive/10 p-3 text-sm">
+                      <p className="font-medium text-destructive">⚠️ Warning</p>
+                      <p className="text-muted-foreground">
+                        <strong>{users.find(u => u.id === transferFromUser)?.full_name || users.find(u => u.id === transferFromUser)?.email}</strong> का सारा data{" "}
+                        <strong>{users.find(u => u.id === transferToUser)?.full_name || users.find(u => u.id === transferToUser)?.email}</strong> को transfer होगा।
+                      </p>
+                    </div>
+                  )}
+                  <Button
+                    onClick={handleTransferData}
+                    disabled={!transferFromUser || !transferToUser || transferring}
+                    className="w-full"
+                  >
+                    <ArrowRightLeft className="mr-2 h-4 w-4" />
+                    {transferring ? "Transferring..." : "Transfer Data"}
+                  </Button>
+                </div>
               </DialogContent>
             </Dialog>
           </TabsContent>
