@@ -579,6 +579,19 @@ const Admin = () => {
                               </DialogContent>
                             </Dialog>
 
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                setCredUser(user);
+                                setCredPassword("");
+                                setCredDialogOpen(true);
+                              }}
+                              title="Send Credentials"
+                            >
+                              <Send className="h-4 w-4" />
+                            </Button>
+
                             {user.banned_until ? (
                               <Button
                                 variant="outline"
