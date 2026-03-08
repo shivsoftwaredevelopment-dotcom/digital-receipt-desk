@@ -106,13 +106,17 @@ const ReceiptHistory = () => {
         <div className="mb-6 space-y-4">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <h1 className="text-3xl font-bold text-primary">Receipt History</h1>
-            <div className="flex gap-2">
+          <div className="flex gap-2">
               <Button variant="outline" onClick={() => navigate("/")}>
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 Dashboard
               </Button>
               <Button onClick={() => navigate("/receipt-form")}>
                 New Receipt
+              </Button>
+              <Button variant="secondary" onClick={exportToCSV} disabled={filteredReceipts.length === 0}>
+                <Download className="mr-2 h-4 w-4" />
+                Export Excel
               </Button>
               <Button variant="outline" onClick={() => navigate("/profile")}>
                 Profile
