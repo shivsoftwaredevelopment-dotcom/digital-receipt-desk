@@ -252,6 +252,32 @@ const Admin = () => {
       setTransferring(false);
     }
   };
+  const handleDataReset = async () => {
+    setResettingData(true);
+    try {
+      const body: Record<string, unknown> = {};
+      if (resetTarget !== "all") body.userId = resetTarget;
+
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error("Not authenticated");
+
+      const res = await supabase.functions.invoke("monthly-data-reset", { body });
+      if (res.error) throw new Error(res.error.message);
+      if (!res.data.success) throw new Error(res.data.error);
+
+      toast.success(`✅ Data backup email sent & reset done! (${res.data.emails_sent} emails, ${res.data.data_reset} users reset)`);
+      if (res.data.errors?.length) {
+        toast.error(`⚠️ कुछ errors: ${res.data.errors.join(", ")}`);
+      }
+      setResetDialogOpen(false);
+      fetchUsers();
+    } catch (error: any) {
+      toast.error(error.message);
+    } finally {
+      setResettingData(false);
+    }
+  };
+
   const fetchTemplates = async () => {
     const { data } = await supabase
       .from("receipt_templates")
