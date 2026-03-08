@@ -140,37 +140,63 @@ const Admin = () => {
     setEditDialogOpen(true);
   };
 
+  const callAdminAction = async (body: Record<string, unknown>) => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) throw new Error("Not authenticated");
+
+    const res = await supabase.functions.invoke("admin-actions", { body });
+    if (res.error) throw new Error(res.error.message);
+    if (!res.data.success) throw new Error(res.data.error);
+    return res.data;
+  };
+
   const handleUpdateUser = async () => {
     if (!editingUser) return;
-
     try {
-      // Update profile information (email update requires edge function)
-      if (editEmail && editEmail !== editingUser.email) {
-        toast.error("Email updates require contacting system administrator");
+      const body: Record<string, unknown> = { action: "update_user", userId: editingUser.id };
+      if (editEmail && editEmail !== editingUser.email) body.email = editEmail;
+      if (editPassword && editPassword.length >= 6) body.password = editPassword;
+      if (!body.email && !body.password) {
+        toast.error("No changes to update");
         return;
       }
-      
-      if (editPassword && editPassword.length >= 6) {
-        toast.error("Password updates require contacting system administrator");
-        return;
-      }
-
-      toast.info("User management features require backend API");
+      await callAdminAction(body);
+      toast.success("User updated successfully");
+      setEditDialogOpen(false);
+      fetchUsers();
     } catch (error: any) {
       toast.error(error.message);
     }
   };
 
   const handleDeleteUser = async (userId: string) => {
-    toast.error("User deletion requires backend API access");
+    try {
+      await callAdminAction({ action: "delete_user", userId });
+      toast.success("User deleted successfully");
+      fetchUsers();
+    } catch (error: any) {
+      toast.error(error.message);
+    }
   };
 
   const handleBlockUser = async (userId: string) => {
-    toast.error("User blocking requires backend API access");
+    try {
+      await callAdminAction({ action: "block_user", userId });
+      toast.success("User blocked successfully");
+      fetchUsers();
+    } catch (error: any) {
+      toast.error(error.message);
+    }
   };
 
   const handleUnblockUser = async (userId: string) => {
-    toast.error("User unblocking requires backend API access");
+    try {
+      await callAdminAction({ action: "unblock_user", userId });
+      toast.success("User unblocked successfully");
+      fetchUsers();
+    } catch (error: any) {
+      toast.error(error.message);
+    }
   };
 
   const handleViewUser = (user: User) => {
@@ -179,7 +205,20 @@ const Admin = () => {
   };
 
   const handleDirectLogin = async (userId: string, userEmail: string) => {
-    toast.error("Direct login requires backend API access");
+    try {
+      const result = await callAdminAction({ action: "generate_link", userId, email: userEmail });
+      // Sign out admin first, then use the token to sign in as user
+      await supabase.auth.signOut();
+      const { error } = await supabase.auth.verifyOtp({
+        token_hash: result.properties.hashed_token,
+        type: "magiclink",
+      });
+      if (error) throw error;
+      toast.success(`Logged in as ${userEmail}`);
+      navigate("/");
+    } catch (error: any) {
+      toast.error(error.message);
+    }
   };
 
   const fetchTemplates = async () => {
