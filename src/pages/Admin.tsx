@@ -91,6 +91,16 @@ const Admin = () => {
     }
   };
 
+  const callAdminAction = async (body: Record<string, unknown>) => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) throw new Error("Not authenticated");
+
+    const res = await supabase.functions.invoke("admin-actions", { body });
+    if (res.error) throw new Error(res.error.message);
+    if (!res.data.success) throw new Error(res.data.error);
+    return res.data;
+  };
+
   const fetchUsers = async () => {
     const { data: profiles } = await supabase
       .from("profiles")
@@ -104,7 +114,6 @@ const Admin = () => {
             .select("*", { count: "exact", head: true })
             .eq("user_id", profile.id);
 
-          // Get ban status from edge function
           let bannedUntil = null;
           try {
             const result = await callAdminAction({ action: "get_user", userId: profile.id });
@@ -133,16 +142,6 @@ const Admin = () => {
     setEditEmail(user.email);
     setEditPassword("");
     setEditDialogOpen(true);
-  };
-
-  const callAdminAction = async (body: Record<string, unknown>) => {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) throw new Error("Not authenticated");
-
-    const res = await supabase.functions.invoke("admin-actions", { body });
-    if (res.error) throw new Error(res.error.message);
-    if (!res.data.success) throw new Error(res.data.error);
-    return res.data;
   };
 
   const handleUpdateUser = async () => {
