@@ -654,6 +654,43 @@ const Admin = () => {
               </CardContent>
             </Card>
 
+            {/* Send Credentials Dialog */}
+            <Dialog open={credDialogOpen} onOpenChange={setCredDialogOpen}>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Send Credentials</DialogTitle>
+                  <DialogDescription>
+                    Set a password and send login details to {credUser?.email}
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4 py-4">
+                  <div className="space-y-2">
+                    <Label>Email</Label>
+                    <Input value={credUser?.email || ""} disabled />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="cred-password">Password</Label>
+                    <Input
+                      id="cred-password"
+                      type="text"
+                      value={credPassword}
+                      onChange={(e) => setCredPassword(e.target.value)}
+                      placeholder="Enter password (min 6 chars)"
+                      minLength={6}
+                    />
+                  </div>
+                  <Button
+                    onClick={handleSendCredentials}
+                    className="w-full"
+                    disabled={sendingCred || credPassword.length < 6}
+                  >
+                    <Send className="mr-2 h-4 w-4" />
+                    {sendingCred ? "Sending..." : "Update Password & Send Email"}
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
+
             {/* View User Dialog */}
             <Dialog open={viewDialogOpen} onOpenChange={setViewDialogOpen}>
               <DialogContent className="max-w-2xl">
