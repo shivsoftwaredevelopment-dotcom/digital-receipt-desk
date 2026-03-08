@@ -66,6 +66,10 @@ const Admin = () => {
   const [resettingData, setResettingData] = useState(false);
   const [resetDialogOpen, setResetDialogOpen] = useState(false);
   const [resetTarget, setResetTarget] = useState<string>("all");
+  const [credDialogOpen, setCredDialogOpen] = useState(false);
+  const [credUser, setCredUser] = useState<User | null>(null);
+  const [credPassword, setCredPassword] = useState("");
+  const [sendingCred, setSendingCred] = useState(false);
 
   useEffect(() => {
     checkAdminAndFetchData();
