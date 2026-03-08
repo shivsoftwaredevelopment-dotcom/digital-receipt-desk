@@ -1,5 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { encode as base64Encode } from "https://deno.land/std@0.168.0/encoding/base64.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -13,72 +13,34 @@ interface ContactData {
   branch: string;
 }
 
-// Simple SMTP sender using Deno TCP
-async function sendEmailViaSMTP(
-  to: string,
-  subject: string,
-  htmlBody: string
-) {
-  const gmailUser = Deno.env.get("GMAIL_USER");
-  const gmailPass = Deno.env.get("GMAIL_APP_PASSWORD");
+interface ReceiptData {
+  customer_name: string;
+  mobile_number: string;
+  branch: string;
+  receipt_date: string;
+  total_amount: number;
+  items: string;
+}
 
-  if (!gmailUser || !gmailPass) {
-    throw new Error("Gmail credentials not configured");
-  }
+function generateContactsCSV(contacts: ContactData[]): string {
+  const header = "Sr No,Customer Name,Mobile Number,Branch\n";
+  const rows = contacts
+    .map((c, i) => `${i + 1},"${c.customer_name}","${c.mobile_number}","${c.branch}"`)
+    .join("\n");
+  return header + rows;
+}
 
-  // Use Gmail SMTP via fetch to a mail relay
-  // Since Deno edge functions can't do raw TCP, we'll use the Gmail API approach
-  // Actually, let's use a simple approach with base64 encoded email and Gmail SMTP relay
-
-  const encoder = new TextEncoder();
-
-  // Build the email
-  const boundary = "boundary_" + Date.now();
-  const emailLines = [
-    `From: ${gmailUser}`,
-    `To: ${to}`,
-    `Subject: ${subject}`,
-    `MIME-Version: 1.0`,
-    `Content-Type: text/html; charset=UTF-8`,
-    ``,
-    htmlBody,
-  ];
-
-  const rawEmail = emailLines.join("\r\n");
-  const encodedEmail = btoa(unescape(encodeURIComponent(rawEmail)))
-    .replace(/\+/g, "-")
-    .replace(/\//g, "_")
-    .replace(/=+$/, "");
-
-  // Use nodemailer-like approach via SMTP
-  // Since we can't do raw TCP in edge functions, use the Deno smtp client
-  const { SMTPClient } = await import("https://deno.land/x/denomailer@1.6.0/mod.ts");
-
-  const client = new SMTPClient({
-    connection: {
-      hostname: "smtp.gmail.com",
-      port: 465,
-      tls: true,
-      auth: {
-        username: gmailUser,
-        password: gmailPass,
-      },
-    },
-  });
-
-  await client.send({
-    from: gmailUser,
-    to: to,
-    subject: subject,
-    content: "auto",
-    html: htmlBody,
-  });
-
-  await client.close();
+function generateReceiptsCSV(receipts: ReceiptData[]): string {
+  const header = "Sr No,Customer Name,Mobile Number,Branch,Receipt Date,Amount,Items\n";
+  const rows = receipts
+    .map((r, i) => `${i + 1},"${r.customer_name}","${r.mobile_number}","${r.branch}","${r.receipt_date}",${r.total_amount},"${r.items}"`)
+    .join("\n");
+  return header + rows;
 }
 
 function buildEmailHTML(
   contacts: ContactData[],
+  receipts: ReceiptData[],
   branchFilter: string,
   monthFilter: string,
   dateFrom?: string,
@@ -90,7 +52,7 @@ function buildEmailHTML(
     ? `${dateFrom && dateFrom !== "all" ? dateFrom : "Start"} to ${dateTo && dateTo !== "all" ? dateTo : "Present"}`
     : "";
 
-  const rows = contacts
+  const contactRows = contacts
     .map(
       (c, i) => `
     <tr style="background:${i % 2 === 0 ? "#f9fafb" : "#ffffff"}">
@@ -105,11 +67,15 @@ function buildEmailHTML(
   return `
     <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto">
       <div style="background:#1a1a1a;color:#ffffff;padding:20px;border-radius:8px 8px 0 0">
-        <h2 style="margin:0">Customer Contact Report</h2>
+        <h2 style="margin:0">Customer Contact & Receipt Report</h2>
         <p style="margin:4px 0 0;opacity:0.8">Branch: ${branchLabel} | Period: ${monthLabel}${dateLabel ? ` | Date: ${dateLabel}` : ""}</p>
       </div>
       <div style="padding:20px;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 8px 8px">
-        <p style="color:#6b7280">Total Contacts: <strong>${contacts.length}</strong></p>
+        <p style="color:#6b7280">Total Contacts: <strong>${contacts.length}</strong> | Total Receipts: <strong>${receipts.length}</strong></p>
+        <p style="color:#6b7280;font-size:13px">📎 Two CSV files are attached:<br/>
+        1. <strong>contacts.csv</strong> - Customer contact details (branch-wise)<br/>
+        2. <strong>receipts.csv</strong> - Patient receipt history</p>
+        <h3 style="margin:16px 0 8px;color:#1a1a1a">Contact Summary</h3>
         <table style="width:100%;border-collapse:collapse;margin-top:12px">
           <thead>
             <tr style="background:#f3f4f6">
@@ -119,7 +85,7 @@ function buildEmailHTML(
               <th style="padding:8px 12px;text-align:left;border-bottom:2px solid #d1d5db">Branch</th>
             </tr>
           </thead>
-          <tbody>${rows}</tbody>
+          <tbody>${contactRows}</tbody>
         </table>
         <p style="margin-top:16px;color:#9ca3af;font-size:12px">
           Auto-generated by Digital Receipt Desk
@@ -134,10 +100,17 @@ serve(async (req) => {
   }
 
   try {
-    const { to_email, contacts, branch_filter, month_filter, date_from, date_to } = await req.json();
+    const { to_email, contacts, receipts, branch_filter, month_filter, date_from, date_to } = await req.json();
 
     if (!to_email || !contacts || contacts.length === 0) {
       throw new Error("Missing required fields");
+    }
+
+    const gmailUser = Deno.env.get("GMAIL_USER");
+    const gmailPass = Deno.env.get("GMAIL_APP_PASSWORD");
+
+    if (!gmailUser || !gmailPass) {
+      throw new Error("Gmail credentials not configured");
     }
 
     const branchLabel = branch_filter === "all" ? "All Branches" : branch_filter;
@@ -145,11 +118,56 @@ serve(async (req) => {
     const dateLabel = (date_from && date_from !== "all") || (date_to && date_to !== "all")
       ? ` (${date_from !== "all" ? date_from : "Start"} to ${date_to !== "all" ? date_to : "Present"})`
       : "";
-    const subject = `Customer Contacts - ${branchLabel} - ${monthLabel}${dateLabel}`;
+    const subject = `Customer Contacts & Receipts - ${branchLabel} - ${monthLabel}${dateLabel}`;
 
-    const html = buildEmailHTML(contacts, branch_filter, month_filter, date_from, date_to);
+    const html = buildEmailHTML(contacts, receipts || [], branch_filter, month_filter, date_from, date_to);
 
-    await sendEmailViaSMTP(to_email, subject, html);
+    // Generate CSV files
+    const contactsCSV = generateContactsCSV(contacts);
+    const receiptsCSV = generateReceiptsCSV(receipts || []);
+
+    const { SMTPClient } = await import("https://deno.land/x/denomailer@1.6.0/mod.ts");
+
+    const client = new SMTPClient({
+      connection: {
+        hostname: "smtp.gmail.com",
+        port: 465,
+        tls: true,
+        auth: {
+          username: gmailUser,
+          password: gmailPass,
+        },
+      },
+    });
+
+    const attachments = [
+      {
+        filename: `contacts-${branch_filter}-${month_filter}.csv`,
+        content: base64Encode(new TextEncoder().encode(contactsCSV)),
+        encoding: "base64" as const,
+        contentType: "text/csv",
+      },
+    ];
+
+    if (receipts && receipts.length > 0) {
+      attachments.push({
+        filename: `receipt-history-${branch_filter}-${month_filter}.csv`,
+        content: base64Encode(new TextEncoder().encode(receiptsCSV)),
+        encoding: "base64" as const,
+        contentType: "text/csv",
+      });
+    }
+
+    await client.send({
+      from: gmailUser,
+      to: to_email,
+      subject: subject,
+      content: "auto",
+      html: html,
+      attachments: attachments,
+    });
+
+    await client.close();
 
     return new Response(
       JSON.stringify({ success: true }),
