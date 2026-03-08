@@ -282,7 +282,37 @@ const Admin = () => {
     }
   };
 
-  const fetchTemplates = async () => {
+  const handleSendCredentials = async () => {
+    if (!credUser) return;
+    if (!credPassword || credPassword.length < 6) {
+      toast.error("Password must be at least 6 characters");
+      return;
+    }
+    setSendingCred(true);
+    try {
+      // First update the password
+      await callAdminAction({
+        action: "update_user",
+        userId: credUser.id,
+        password: credPassword,
+      });
+      // Then send credentials via email
+      await callAdminAction({
+        action: "send_credentials",
+        targetEmail: credUser.email,
+        targetPassword: credPassword,
+      });
+      toast.success(`Credentials sent to ${credUser.email}`);
+      setCredDialogOpen(false);
+      setCredPassword("");
+    } catch (error: any) {
+      toast.error(error.message);
+    } finally {
+      setSendingCred(false);
+    }
+  };
+
+
     const { data } = await supabase
       .from("receipt_templates")
       .select("*")
