@@ -4,8 +4,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { ArrowLeft, Eye } from "lucide-react";
+import { ArrowLeft, Eye, Search } from "lucide-react";
 
 interface Receipt {
   id: string;
@@ -22,6 +24,18 @@ const AdminUserReceipts = () => {
   const [receipts, setReceipts] = useState<Receipt[]>([]);
   const [userName, setUserName] = useState("");
   const [loading, setLoading] = useState(true);
+  const [branchFilter, setBranchFilter] = useState("all");
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const branches = [...new Set(receipts.map((r) => r.branch))];
+  const filteredReceipts = receipts.filter((r) => {
+    const matchBranch = branchFilter === "all" || r.branch === branchFilter;
+    const matchSearch =
+      !searchTerm ||
+      r.customer_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      r.mobile_number.includes(searchTerm);
+    return matchBranch && matchSearch;
+  });
 
   useEffect(() => {
     checkAdminAndFetchReceipts();
@@ -91,9 +105,32 @@ const AdminUserReceipts = () => {
           </Button>
         </div>
 
+        <div className="mb-4 flex flex-col gap-3 sm:flex-row">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              placeholder="Search by name or mobile..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-9"
+            />
+          </div>
+          <Select value={branchFilter} onValueChange={setBranchFilter}>
+            <SelectTrigger className="w-full sm:w-[220px]">
+              <SelectValue placeholder="Filter by branch" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Branches</SelectItem>
+              {branches.map((b) => (
+                <SelectItem key={b} value={b}>{b}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
         <Card>
           <CardHeader>
-            <CardTitle>All Receipts ({receipts.length})</CardTitle>
+            <CardTitle>All Receipts ({filteredReceipts.length})</CardTitle>
           </CardHeader>
           <CardContent>
             <Table>
@@ -108,7 +145,7 @@ const AdminUserReceipts = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {receipts.map((receipt) => (
+                {filteredReceipts.map((receipt) => (
                   <TableRow key={receipt.id}>
                     <TableCell>{new Date(receipt.receipt_date).toLocaleDateString()}</TableCell>
                     <TableCell>{receipt.customer_name}</TableCell>
