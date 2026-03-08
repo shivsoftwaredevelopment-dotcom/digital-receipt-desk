@@ -258,6 +258,30 @@ const Admin = () => {
     if (data) setTemplates(data);
   };
 
+  const fetchMaintenanceMode = async () => {
+    const { data } = await supabase
+      .from("site_settings")
+      .select("value")
+      .eq("key", "maintenance_mode")
+      .maybeSingle();
+    setMaintenanceMode(data?.value === "true");
+  };
+
+  const toggleMaintenanceMode = async () => {
+    const newValue = !maintenanceMode;
+    try {
+      const { error } = await supabase
+        .from("site_settings")
+        .update({ value: String(newValue), updated_at: new Date().toISOString() })
+        .eq("key", "maintenance_mode");
+      if (error) throw error;
+      setMaintenanceMode(newValue);
+      toast.success(newValue ? "Maintenance mode ON - Users will see maintenance page" : "Maintenance mode OFF - Site is live");
+    } catch (error: any) {
+      toast.error(error.message);
+    }
+  };
+
   const handleCreateTemplate = async () => {
     if (!newTemplate.name) {
       toast.error("Template name is required");
