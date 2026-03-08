@@ -24,6 +24,18 @@ const AdminUserReceipts = () => {
   const [receipts, setReceipts] = useState<Receipt[]>([]);
   const [userName, setUserName] = useState("");
   const [loading, setLoading] = useState(true);
+  const [branchFilter, setBranchFilter] = useState("all");
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const branches = [...new Set(receipts.map((r) => r.branch))];
+  const filteredReceipts = receipts.filter((r) => {
+    const matchBranch = branchFilter === "all" || r.branch === branchFilter;
+    const matchSearch =
+      !searchTerm ||
+      r.customer_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      r.mobile_number.includes(searchTerm);
+    return matchBranch && matchSearch;
+  });
 
   useEffect(() => {
     checkAdminAndFetchReceipts();
