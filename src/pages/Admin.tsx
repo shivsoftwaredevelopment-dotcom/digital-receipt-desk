@@ -353,7 +353,18 @@ const Admin = () => {
             <Shield className="h-8 w-8 text-primary" />
             <h1 className="text-3xl font-bold text-primary">Admin Panel</h1>
           </div>
-          <div className="flex gap-2">
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 rounded-md border border-input px-3 py-2">
+              <Wrench className="h-4 w-4 text-muted-foreground" />
+              <Label htmlFor="maintenance-toggle" className="text-sm cursor-pointer">
+                Maintenance
+              </Label>
+              <Switch
+                id="maintenance-toggle"
+                checked={maintenanceMode}
+                onCheckedChange={toggleMaintenanceMode}
+              />
+            </div>
             <Button variant="outline" onClick={() => setTransferDialogOpen(true)}>
               <ArrowRightLeft className="mr-2 h-4 w-4" />
               Transfer Data
