@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { ArrowLeft, Shield, Users, FileText, Palette, Trash2, Save, Edit, Ban, Unlock, Eye, LogIn, ArrowRightLeft, Wrench } from "lucide-react";
+import { ArrowLeft, Shield, Users, FileText, Palette, Trash2, Save, Edit, Ban, Unlock, Eye, LogIn, ArrowRightLeft, Wrench, RotateCcw } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
@@ -63,6 +63,9 @@ const Admin = () => {
   const [transferToUser, setTransferToUser] = useState<string>("");
   const [transferring, setTransferring] = useState(false);
   const [maintenanceMode, setMaintenanceMode] = useState(false);
+  const [resettingData, setResettingData] = useState(false);
+  const [resetDialogOpen, setResetDialogOpen] = useState(false);
+  const [resetTarget, setResetTarget] = useState<string>("all");
 
   useEffect(() => {
     checkAdminAndFetchData();
@@ -249,6 +252,32 @@ const Admin = () => {
       setTransferring(false);
     }
   };
+  const handleDataReset = async () => {
+    setResettingData(true);
+    try {
+      const body: Record<string, unknown> = {};
+      if (resetTarget !== "all") body.userId = resetTarget;
+
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error("Not authenticated");
+
+      const res = await supabase.functions.invoke("monthly-data-reset", { body });
+      if (res.error) throw new Error(res.error.message);
+      if (!res.data.success) throw new Error(res.data.error);
+
+      toast.success(`✅ Data backup email sent & reset done! (${res.data.emails_sent} emails, ${res.data.data_reset} users reset)`);
+      if (res.data.errors?.length) {
+        toast.error(`⚠️ कुछ errors: ${res.data.errors.join(", ")}`);
+      }
+      setResetDialogOpen(false);
+      fetchUsers();
+    } catch (error: any) {
+      toast.error(error.message);
+    } finally {
+      setResettingData(false);
+    }
+  };
+
   const fetchTemplates = async () => {
     const { data } = await supabase
       .from("receipt_templates")
@@ -365,6 +394,10 @@ const Admin = () => {
                 onCheckedChange={toggleMaintenanceMode}
               />
             </div>
+            <Button variant="destructive" onClick={() => setResetDialogOpen(true)}>
+              <RotateCcw className="mr-2 h-4 w-4" />
+              Reset Data
+            </Button>
             <Button variant="outline" onClick={() => setTransferDialogOpen(true)}>
               <ArrowRightLeft className="mr-2 h-4 w-4" />
               Transfer Data
@@ -712,6 +745,67 @@ const Admin = () => {
                     <ArrowRightLeft className="mr-2 h-4 w-4" />
                     {transferring ? "Transferring..." : "Transfer Data"}
                   </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
+            {/* Reset Data Dialog */}
+            <Dialog open={resetDialogOpen} onOpenChange={setResetDialogOpen}>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>🔄 Data Reset (Backup + Delete)</DialogTitle>
+                  <DialogDescription>
+                    पहले सारा data email पर भेजा जाएगा, फिर receipts और contacts delete होंगे। जब तक email नहीं जाएगा, data delete नहीं होगा।
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4 py-4">
+                  <div className="space-y-2">
+                    <Label>किसका data reset करना है?</Label>
+                    <Select value={resetTarget} onValueChange={setResetTarget}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select user" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">🔴 सभी Users (All)</SelectItem>
+                        {users.map((u) => (
+                          <SelectItem key={u.id} value={u.id}>
+                            {u.full_name || u.email} ({u.receipt_count} receipts)
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="rounded-md border border-destructive/50 bg-destructive/10 p-3 text-sm">
+                    <p className="font-medium text-destructive">⚠️ Important</p>
+                    <p className="text-muted-foreground">
+                      1. पहले सारा data CSV attachment के साथ email भेजा जाएगा<br/>
+                      2. Email successfully भेजने के बाद ही data delete होगा<br/>
+                      3. अगर email fail हो तो data safe रहेगा
+                    </p>
+                  </div>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button variant="destructive" className="w-full" disabled={resettingData}>
+                        <RotateCcw className="mr-2 h-4 w-4" />
+                        {resettingData ? "Processing... Email भेज रहे हैं..." : "Backup Email & Reset Data"}
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>क्या आप sure हैं?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          {resetTarget === "all"
+                            ? "सभी users का data email पर भेजकर delete होगा।"
+                            : `${users.find(u => u.id === resetTarget)?.full_name || users.find(u => u.id === resetTarget)?.email} का data email पर भेजकर delete होगा।`}
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={handleDataReset} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                          हां, Reset करें
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 </div>
               </DialogContent>
             </Dialog>
