@@ -169,7 +169,6 @@ const Contacts = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
-      // Get profile email
       const { data: profile } = await supabase
         .from("profiles")
         .select("email, full_name")
@@ -177,6 +176,25 @@ const Contacts = () => {
         .single();
 
       const toEmail = profile?.email || user.email;
+
+      // Get filtered receipts (not deduplicated) for receipt history CSV
+      let filteredReceipts = receipts;
+      if (selectedBranch !== "all") {
+        filteredReceipts = filteredReceipts.filter((r) => r.branch === selectedBranch);
+      }
+      if (selectedMonth !== "all") {
+        filteredReceipts = filteredReceipts.filter((r) => {
+          const d = new Date(r.receipt_date);
+          const m = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+          return m === selectedMonth;
+        });
+      }
+      if (dateFrom) {
+        filteredReceipts = filteredReceipts.filter((r) => r.receipt_date >= dateFrom);
+      }
+      if (dateTo) {
+        filteredReceipts = filteredReceipts.filter((r) => r.receipt_date <= dateTo);
+      }
 
       const { data: result, error } = await supabase.functions.invoke("send-contacts-email", {
         body: {
@@ -186,6 +204,14 @@ const Contacts = () => {
             mobile_number: r.mobile_number,
             branch: r.branch,
           })),
+          receipts: filteredReceipts.map((r) => ({
+            customer_name: r.customer_name,
+            mobile_number: r.mobile_number,
+            branch: r.branch,
+            receipt_date: r.receipt_date,
+            total_amount: r.total_amount,
+            items: Array.isArray(r.items) ? r.items.map((item: any) => item.name || item.description || "").join(", ") : "",
+          })),
           branch_filter: selectedBranch,
           month_filter: selectedMonth,
           date_from: dateFrom || "all",
@@ -194,7 +220,7 @@ const Contacts = () => {
       });
 
       if (error) throw error;
-      toast.success(`Contact details sent to ${toEmail}`);
+      toast.success(`Contact details & receipt history sent to ${toEmail}`);
     } catch (err: any) {
       toast.error(err.message || "Failed to send email");
     } finally {
