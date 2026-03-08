@@ -748,6 +748,67 @@ const Admin = () => {
                 </div>
               </DialogContent>
             </Dialog>
+            {/* Reset Data Dialog */}
+            <Dialog open={resetDialogOpen} onOpenChange={setResetDialogOpen}>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>🔄 Data Reset (Backup + Delete)</DialogTitle>
+                  <DialogDescription>
+                    पहले सारा data email पर भेजा जाएगा, फिर receipts और contacts delete होंगे। जब तक email नहीं जाएगा, data delete नहीं होगा।
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4 py-4">
+                  <div className="space-y-2">
+                    <Label>किसका data reset करना है?</Label>
+                    <Select value={resetTarget} onValueChange={setResetTarget}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select user" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">🔴 सभी Users (All)</SelectItem>
+                        {users.map((u) => (
+                          <SelectItem key={u.id} value={u.id}>
+                            {u.full_name || u.email} ({u.receipt_count} receipts)
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="rounded-md border border-destructive/50 bg-destructive/10 p-3 text-sm">
+                    <p className="font-medium text-destructive">⚠️ Important</p>
+                    <p className="text-muted-foreground">
+                      1. पहले सारा data CSV attachment के साथ email भेजा जाएगा<br/>
+                      2. Email successfully भेजने के बाद ही data delete होगा<br/>
+                      3. अगर email fail हो तो data safe रहेगा
+                    </p>
+                  </div>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button variant="destructive" className="w-full" disabled={resettingData}>
+                        <RotateCcw className="mr-2 h-4 w-4" />
+                        {resettingData ? "Processing... Email भेज रहे हैं..." : "Backup Email & Reset Data"}
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>क्या आप sure हैं?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          {resetTarget === "all"
+                            ? "सभी users का data email पर भेजकर delete होगा।"
+                            : `${users.find(u => u.id === resetTarget)?.full_name || users.find(u => u.id === resetTarget)?.email} का data email पर भेजकर delete होगा।`}
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={handleDataReset} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                          हां, Reset करें
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </div>
+              </DialogContent>
+            </Dialog>
           </TabsContent>
 
           <TabsContent value="templates">
