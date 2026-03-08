@@ -312,7 +312,7 @@ const Admin = () => {
     }
   };
 
-
+  const fetchTemplates = async () => {
     const { data } = await supabase
       .from("receipt_templates")
       .select("*")
