@@ -105,9 +105,32 @@ const AdminUserReceipts = () => {
           </Button>
         </div>
 
+        <div className="mb-4 flex flex-col gap-3 sm:flex-row">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              placeholder="Search by name or mobile..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-9"
+            />
+          </div>
+          <Select value={branchFilter} onValueChange={setBranchFilter}>
+            <SelectTrigger className="w-full sm:w-[220px]">
+              <SelectValue placeholder="Filter by branch" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Branches</SelectItem>
+              {branches.map((b) => (
+                <SelectItem key={b} value={b}>{b}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
         <Card>
           <CardHeader>
-            <CardTitle>All Receipts ({receipts.length})</CardTitle>
+            <CardTitle>All Receipts ({filteredReceipts.length})</CardTitle>
           </CardHeader>
           <CardContent>
             <Table>
@@ -122,7 +145,7 @@ const AdminUserReceipts = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {receipts.map((receipt) => (
+                {filteredReceipts.map((receipt) => (
                   <TableRow key={receipt.id}>
                     <TableCell>{new Date(receipt.receipt_date).toLocaleDateString()}</TableCell>
                     <TableCell>{receipt.customer_name}</TableCell>
