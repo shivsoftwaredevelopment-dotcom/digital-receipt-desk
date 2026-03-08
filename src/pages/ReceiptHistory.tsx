@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { ArrowLeft, Eye, Trash2, LogOut, Search } from "lucide-react";
+import { ArrowLeft, Eye, Trash2, LogOut, Search, Download } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -87,6 +87,21 @@ const ReceiptHistory = () => {
     }
   };
 
+  const exportToCSV = () => {
+    const header = "Date,Customer Name,Mobile Number,Branch,Amount\n";
+    const rows = filteredReceipts
+      .map((r) => `"${new Date(r.receipt_date).toLocaleDateString()}","${r.customer_name}","${r.mobile_number}","${r.branch}",${r.total_amount.toFixed(2)}`)
+      .join("\n");
+    const csv = header + rows;
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `receipt-history-${branchFilter}-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     navigate("/auth");
@@ -106,13 +121,17 @@ const ReceiptHistory = () => {
         <div className="mb-6 space-y-4">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <h1 className="text-3xl font-bold text-primary">Receipt History</h1>
-            <div className="flex gap-2">
+          <div className="flex gap-2">
               <Button variant="outline" onClick={() => navigate("/")}>
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 Dashboard
               </Button>
               <Button onClick={() => navigate("/receipt-form")}>
                 New Receipt
+              </Button>
+              <Button variant="secondary" onClick={exportToCSV} disabled={filteredReceipts.length === 0}>
+                <Download className="mr-2 h-4 w-4" />
+                Export Excel
               </Button>
               <Button variant="outline" onClick={() => navigate("/profile")}>
                 Profile
