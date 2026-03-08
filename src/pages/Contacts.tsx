@@ -36,6 +36,8 @@ interface Receipt {
   mobile_number: string;
   branch: string;
   receipt_date: string;
+  total_amount: number;
+  items: any;
 }
 
 const Contacts = () => {
