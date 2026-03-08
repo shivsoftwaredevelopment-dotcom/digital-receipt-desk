@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Session } from "@supabase/supabase-js";
+import Maintenance from "@/pages/Maintenance";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -10,24 +11,52 @@ interface ProtectedRouteProps {
 const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const [maintenanceMode, setMaintenanceMode] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
-    // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (_event, session) => {
         setSession(session);
-        setLoading(false);
+        if (session?.user) {
+          checkAdminAndMaintenance(session.user.id);
+        } else {
+          setLoading(false);
+        }
       }
     );
 
-    // Check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
-      setLoading(false);
+      if (session?.user) {
+        checkAdminAndMaintenance(session.user.id);
+      } else {
+        setLoading(false);
+      }
     });
 
     return () => subscription.unsubscribe();
   }, []);
+
+  const checkAdminAndMaintenance = async (userId: string) => {
+    const [roleResult, settingsResult] = await Promise.all([
+      supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", userId)
+        .eq("role", "admin")
+        .maybeSingle(),
+      supabase
+        .from("site_settings")
+        .select("value")
+        .eq("key", "maintenance_mode")
+        .maybeSingle(),
+    ]);
+
+    setIsAdmin(!!roleResult.data);
+    setMaintenanceMode(settingsResult.data?.value === "true");
+    setLoading(false);
+  };
 
   if (loading) {
     return (
@@ -39,6 +68,10 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
 
   if (!session) {
     return <Navigate to="/auth" replace />;
+  }
+
+  if (maintenanceMode && !isAdmin) {
+    return <Maintenance />;
   }
 
   return <>{children}</>;

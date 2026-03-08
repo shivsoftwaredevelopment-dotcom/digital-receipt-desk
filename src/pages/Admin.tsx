@@ -8,11 +8,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { ArrowLeft, Shield, Users, FileText, Palette, Trash2, Save, Edit, Ban, Unlock, Eye, LogIn, ArrowRightLeft } from "lucide-react";
+import { ArrowLeft, Shield, Users, FileText, Palette, Trash2, Save, Edit, Ban, Unlock, Eye, LogIn, ArrowRightLeft, Wrench } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 
 interface User {
   id: string;
@@ -61,6 +62,7 @@ const Admin = () => {
   const [transferFromUser, setTransferFromUser] = useState<string>("");
   const [transferToUser, setTransferToUser] = useState<string>("");
   const [transferring, setTransferring] = useState(false);
+  const [maintenanceMode, setMaintenanceMode] = useState(false);
 
   useEffect(() => {
     checkAdminAndFetchData();
@@ -88,7 +90,7 @@ const Admin = () => {
       }
 
       setIsAdmin(true);
-      await Promise.all([fetchUsers(), fetchTemplates()]);
+      await Promise.all([fetchUsers(), fetchTemplates(), fetchMaintenanceMode()]);
     } catch (error: any) {
       toast.error(error.message);
     } finally {
@@ -256,6 +258,30 @@ const Admin = () => {
     if (data) setTemplates(data);
   };
 
+  const fetchMaintenanceMode = async () => {
+    const { data } = await supabase
+      .from("site_settings")
+      .select("value")
+      .eq("key", "maintenance_mode")
+      .maybeSingle();
+    setMaintenanceMode(data?.value === "true");
+  };
+
+  const toggleMaintenanceMode = async () => {
+    const newValue = !maintenanceMode;
+    try {
+      const { error } = await supabase
+        .from("site_settings")
+        .update({ value: String(newValue), updated_at: new Date().toISOString() })
+        .eq("key", "maintenance_mode");
+      if (error) throw error;
+      setMaintenanceMode(newValue);
+      toast.success(newValue ? "Maintenance mode ON - Users will see maintenance page" : "Maintenance mode OFF - Site is live");
+    } catch (error: any) {
+      toast.error(error.message);
+    }
+  };
+
   const handleCreateTemplate = async () => {
     if (!newTemplate.name) {
       toast.error("Template name is required");
@@ -327,7 +353,18 @@ const Admin = () => {
             <Shield className="h-8 w-8 text-primary" />
             <h1 className="text-3xl font-bold text-primary">Admin Panel</h1>
           </div>
-          <div className="flex gap-2">
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 rounded-md border border-input px-3 py-2">
+              <Wrench className="h-4 w-4 text-muted-foreground" />
+              <Label htmlFor="maintenance-toggle" className="text-sm cursor-pointer">
+                Maintenance
+              </Label>
+              <Switch
+                id="maintenance-toggle"
+                checked={maintenanceMode}
+                onCheckedChange={toggleMaintenanceMode}
+              />
+            </div>
             <Button variant="outline" onClick={() => setTransferDialogOpen(true)}>
               <ArrowRightLeft className="mr-2 h-4 w-4" />
               Transfer Data
