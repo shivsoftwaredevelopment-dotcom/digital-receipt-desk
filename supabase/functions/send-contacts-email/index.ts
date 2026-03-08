@@ -102,7 +102,7 @@ serve(async (req) => {
   try {
     const { to_email, contacts, receipts, branch_filter, month_filter, date_from, date_to } = await req.json();
 
-    if (!to_email || !contacts || contacts.length === 0) {
+    if (!to_email || ((!contacts || contacts.length === 0) && (!receipts || receipts.length === 0))) {
       throw new Error("Missing required fields");
     }
 
