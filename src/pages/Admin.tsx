@@ -94,29 +94,24 @@ const Admin = () => {
   const fetchUsers = async () => {
     const { data: profiles } = await supabase
       .from("profiles")
-      .select(`
-        id,
-        email,
-        full_name,
-        phone,
-        profile_image_url
-      `);
+      .select(`id, email, full_name, phone, profile_image_url`);
 
     if (profiles) {
       const usersWithDetails = await Promise.all(
         profiles.map(async (profile) => {
-          // Get email from auth metadata (stored in profiles if available)
-          const { data: receiptsData, count } = await supabase
+          const { count } = await supabase
             .from("receipts")
             .select("*", { count: "exact", head: true })
             .eq("user_id", profile.id);
 
-          // Try to get email from user_roles join
-          const { data: userData } = await supabase
-            .from("user_roles")
-            .select("user_id")
-            .eq("user_id", profile.id)
-            .single();
+          // Get ban status from edge function
+          let bannedUntil = null;
+          try {
+            const result = await callAdminAction({ action: "get_user", userId: profile.id });
+            bannedUntil = result.user?.banned_until || null;
+          } catch {
+            // ignore errors for individual user lookups
+          }
 
           return {
             id: profile.id,
@@ -125,7 +120,7 @@ const Admin = () => {
             phone: profile.phone,
             profile_image_url: profile.profile_image_url,
             receipt_count: count || 0,
-            banned_until: null,
+            banned_until: bannedUntil,
           };
         })
       );
