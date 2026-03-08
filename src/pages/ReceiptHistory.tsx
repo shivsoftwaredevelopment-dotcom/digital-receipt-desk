@@ -32,6 +32,7 @@ const ReceiptHistory = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [branchFilter, setBranchFilter] = useState("all");
+  const [sendingMail, setSendingMail] = useState(false);
 
   useEffect(() => {
     fetchReceipts();
