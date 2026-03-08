@@ -39,7 +39,8 @@ serve(async (req) => {
 
     if (!roleData) throw new Error("Access denied - Admin only");
 
-    const { action, userId, email, password } = await req.json();
+    const body = await req.json();
+    const { action, userId, email, password } = body;
 
     switch (action) {
       case "delete_user": {
