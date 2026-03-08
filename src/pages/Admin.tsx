@@ -62,6 +62,7 @@ const Admin = () => {
   const [transferFromUser, setTransferFromUser] = useState<string>("");
   const [transferToUser, setTransferToUser] = useState<string>("");
   const [transferring, setTransferring] = useState(false);
+  const [maintenanceMode, setMaintenanceMode] = useState(false);
 
   useEffect(() => {
     checkAdminAndFetchData();
