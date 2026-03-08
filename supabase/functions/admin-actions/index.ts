@@ -136,9 +136,8 @@ serve(async (req) => {
       }
 
       case "transfer_data": {
-        const { fromUserId, toUserId } = await req.json().catch(() => ({ fromUserId: undefined, toUserId: undefined }));
-        const sourceId = body?.fromUserId || fromUserId;
-        const targetId = body?.toUserId || toUserId;
+        const sourceId = body.fromUserId;
+        const targetId = body.toUserId;
 
         if (!sourceId || !targetId) throw new Error("Both source and target user IDs are required");
         if (sourceId === targetId) throw new Error("Source and target users must be different");
