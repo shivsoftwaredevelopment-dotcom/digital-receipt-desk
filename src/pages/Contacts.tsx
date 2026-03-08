@@ -78,7 +78,7 @@ const Contacts = () => {
     try {
       const { data, error } = await supabase
         .from("receipts")
-        .select("customer_name, mobile_number, branch, receipt_date");
+        .select("customer_name, mobile_number, branch, receipt_date, total_amount, items");
       if (error) throw error;
       setReceipts(data || []);
     } catch {
