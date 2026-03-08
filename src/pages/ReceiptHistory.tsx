@@ -180,6 +180,10 @@ const ReceiptHistory = () => {
                 <Download className="mr-2 h-4 w-4" />
                 Export Excel
               </Button>
+              <Button variant="secondary" onClick={sendToEmail} disabled={filteredReceipts.length === 0 || sendingMail}>
+                <Mail className="mr-2 h-4 w-4" />
+                {sendingMail ? "Sending..." : "Send Mail"}
+              </Button>
               <Button variant="outline" onClick={() => navigate("/profile")}>
                 Profile
               </Button>
