@@ -87,6 +87,21 @@ const ReceiptHistory = () => {
     }
   };
 
+  const exportToCSV = () => {
+    const header = "Date,Customer Name,Mobile Number,Branch,Amount\n";
+    const rows = filteredReceipts
+      .map((r) => `"${new Date(r.receipt_date).toLocaleDateString()}","${r.customer_name}","${r.mobile_number}","${r.branch}",${r.total_amount.toFixed(2)}`)
+      .join("\n");
+    const csv = header + rows;
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `receipt-history-${branchFilter}-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     navigate("/auth");
