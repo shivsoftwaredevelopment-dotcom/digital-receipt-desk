@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { ArrowLeft, Shield, Users, FileText, Palette, Trash2, Save, Edit, Ban, Unlock, Eye, LogIn, ArrowRightLeft, Wrench, RotateCcw } from "lucide-react";
+import { ArrowLeft, Shield, Users, FileText, Palette, Trash2, Save, Edit, Ban, Unlock, Eye, LogIn, ArrowRightLeft, Wrench, RotateCcw, Send } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
@@ -66,6 +66,10 @@ const Admin = () => {
   const [resettingData, setResettingData] = useState(false);
   const [resetDialogOpen, setResetDialogOpen] = useState(false);
   const [resetTarget, setResetTarget] = useState<string>("all");
+  const [credDialogOpen, setCredDialogOpen] = useState(false);
+  const [credUser, setCredUser] = useState<User | null>(null);
+  const [credPassword, setCredPassword] = useState("");
+  const [sendingCred, setSendingCred] = useState(false);
 
   useEffect(() => {
     checkAdminAndFetchData();
@@ -275,6 +279,36 @@ const Admin = () => {
       toast.error(error.message);
     } finally {
       setResettingData(false);
+    }
+  };
+
+  const handleSendCredentials = async () => {
+    if (!credUser) return;
+    if (!credPassword || credPassword.length < 6) {
+      toast.error("Password must be at least 6 characters");
+      return;
+    }
+    setSendingCred(true);
+    try {
+      // First update the password
+      await callAdminAction({
+        action: "update_user",
+        userId: credUser.id,
+        password: credPassword,
+      });
+      // Then send credentials via email
+      await callAdminAction({
+        action: "send_credentials",
+        targetEmail: credUser.email,
+        targetPassword: credPassword,
+      });
+      toast.success(`Credentials sent to ${credUser.email}`);
+      setCredDialogOpen(false);
+      setCredPassword("");
+    } catch (error: any) {
+      toast.error(error.message);
+    } finally {
+      setSendingCred(false);
     }
   };
 
@@ -545,6 +579,19 @@ const Admin = () => {
                               </DialogContent>
                             </Dialog>
 
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                setCredUser(user);
+                                setCredPassword("");
+                                setCredDialogOpen(true);
+                              }}
+                              title="Send Credentials"
+                            >
+                              <Send className="h-4 w-4" />
+                            </Button>
+
                             {user.banned_until ? (
                               <Button
                                 variant="outline"
@@ -606,6 +653,43 @@ const Admin = () => {
                 </Table>
               </CardContent>
             </Card>
+
+            {/* Send Credentials Dialog */}
+            <Dialog open={credDialogOpen} onOpenChange={setCredDialogOpen}>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Send Credentials</DialogTitle>
+                  <DialogDescription>
+                    Set a password and send login details to {credUser?.email}
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4 py-4">
+                  <div className="space-y-2">
+                    <Label>Email</Label>
+                    <Input value={credUser?.email || ""} disabled />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="cred-password">Password</Label>
+                    <Input
+                      id="cred-password"
+                      type="text"
+                      value={credPassword}
+                      onChange={(e) => setCredPassword(e.target.value)}
+                      placeholder="Enter password (min 6 chars)"
+                      minLength={6}
+                    />
+                  </div>
+                  <Button
+                    onClick={handleSendCredentials}
+                    className="w-full"
+                    disabled={sendingCred || credPassword.length < 6}
+                  >
+                    <Send className="mr-2 h-4 w-4" />
+                    {sendingCred ? "Sending..." : "Update Password & Send Email"}
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
 
             {/* View User Dialog */}
             <Dialog open={viewDialogOpen} onOpenChange={setViewDialogOpen}>

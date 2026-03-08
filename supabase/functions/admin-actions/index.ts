@@ -135,6 +135,78 @@ serve(async (req) => {
         );
       }
 
+      case "send_credentials": {
+        const targetEmail = body.targetEmail;
+        const targetPassword = body.targetPassword;
+        const siteUrl = body.siteUrl || "https://digital-receipt-desk.lovable.app";
+
+        if (!targetEmail) throw new Error("Email is required");
+        if (!targetPassword) throw new Error("Password is required");
+
+        const gmailUser = Deno.env.get("GMAIL_USER");
+        const gmailPass = Deno.env.get("GMAIL_APP_PASSWORD");
+        if (!gmailUser || !gmailPass) throw new Error("Email service not configured");
+
+        const emailHtml = `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+            <div style="background: #1a1a1a; color: #ffffff; padding: 20px; border-radius: 8px 8px 0 0; text-align: center;">
+              <h1 style="margin: 0;">🔐 Your Login Credentials</h1>
+            </div>
+            <div style="background: #f9f9f9; padding: 24px; border: 1px solid #e0e0e0; border-radius: 0 0 8px 8px;">
+              <p style="font-size: 16px;">Hello,</p>
+              <p>Your account has been set up. Here are your login details:</p>
+              <div style="background: #ffffff; border: 1px solid #ddd; border-radius: 8px; padding: 16px; margin: 16px 0;">
+                <p style="margin: 8px 0;"><strong>📧 Email:</strong> ${targetEmail}</p>
+                <p style="margin: 8px 0;"><strong>🔑 Password:</strong> ${targetPassword}</p>
+                <p style="margin: 8px 0;"><strong>🌐 Login URL:</strong> <a href="${siteUrl}/auth" style="color: #3b82f6;">${siteUrl}/auth</a></p>
+              </div>
+              <p style="color: #666; font-size: 13px;">⚠️ Please change your password after first login for security.</p>
+              <p style="margin-top: 20px;">Best regards,<br/>Admin Team</p>
+            </div>
+          </div>
+        `;
+
+        const emailResponse = await fetch("https://smtp-relay.brevo.com/v3/smtp/email", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            sender: { email: gmailUser, name: "Digital Receipt System" },
+            to: [{ email: targetEmail }],
+            subject: "Your Login Credentials - Digital Receipt System",
+            htmlContent: emailHtml,
+          }),
+        });
+
+        // Fallback: use raw SMTP via Gmail
+        if (!emailResponse.ok) {
+          // Use Deno's built-in fetch to send via a simple email API
+          const { SMTPClient } = await import("https://deno.land/x/denomailer@1.6.0/mod.ts");
+          const client = new SMTPClient({
+            connection: {
+              hostname: "smtp.gmail.com",
+              port: 465,
+              tls: true,
+              auth: { username: gmailUser, password: gmailPass },
+            },
+          });
+
+          await client.send({
+            from: gmailUser,
+            to: targetEmail,
+            subject: "Your Login Credentials - Digital Receipt System",
+            content: "auto",
+            html: emailHtml,
+          });
+
+          await client.close();
+        }
+
+        return new Response(
+          JSON.stringify({ success: true, message: `Credentials sent to ${targetEmail}` }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
       case "transfer_data": {
         const sourceId = body.fromUserId;
         const targetId = body.toUserId;
