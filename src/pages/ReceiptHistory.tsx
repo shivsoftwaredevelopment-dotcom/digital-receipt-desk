@@ -103,6 +103,52 @@ const ReceiptHistory = () => {
     URL.revokeObjectURL(url);
   };
 
+  const sendToEmail = async () => {
+    if (filteredReceipts.length === 0) {
+      toast.error("No receipts to send");
+      return;
+    }
+    setSendingMail(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not authenticated");
+
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("email")
+        .eq("id", user.id)
+        .single();
+
+      const toEmail = profile?.email || user.email;
+
+      const { error } = await supabase.functions.invoke("send-contacts-email", {
+        body: {
+          to_email: toEmail,
+          contacts: [],
+          receipts: filteredReceipts.map((r) => ({
+            customer_name: r.customer_name,
+            mobile_number: r.mobile_number,
+            branch: r.branch,
+            receipt_date: r.receipt_date,
+            total_amount: r.total_amount,
+            items: "",
+          })),
+          branch_filter: branchFilter,
+          month_filter: "all",
+          date_from: "all",
+          date_to: "all",
+        },
+      });
+
+      if (error) throw error;
+      toast.success(`Receipt history sent to ${toEmail}`);
+    } catch (err: any) {
+      toast.error(err.message || "Failed to send email");
+    } finally {
+      setSendingMail(false);
+    }
+  };
+
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     navigate("/auth");
