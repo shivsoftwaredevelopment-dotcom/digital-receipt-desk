@@ -57,6 +57,10 @@ const Admin = () => {
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [viewingUser, setViewingUser] = useState<User | null>(null);
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
+  const [transferDialogOpen, setTransferDialogOpen] = useState(false);
+  const [transferFromUser, setTransferFromUser] = useState<string>("");
+  const [transferToUser, setTransferToUser] = useState<string>("");
+  const [transferring, setTransferring] = useState(false);
 
   useEffect(() => {
     checkAdminAndFetchData();
