@@ -617,6 +617,67 @@ const Admin = () => {
                 )}
               </DialogContent>
             </Dialog>
+
+            {/* Transfer Data Dialog */}
+            <Dialog open={transferDialogOpen} onOpenChange={setTransferDialogOpen}>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Transfer User Data</DialogTitle>
+                  <DialogDescription>
+                    एक user का सारा data (receipts + contacts) दूसरे user को transfer करें। यह action irreversible है।
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4 py-4">
+                  <div className="space-y-2">
+                    <Label>Source User (जिसका data transfer होगा)</Label>
+                    <Select value={transferFromUser} onValueChange={setTransferFromUser}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Source user select करें" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {users.map((u) => (
+                          <SelectItem key={u.id} value={u.id}>
+                            {u.full_name || u.email} ({u.receipt_count} receipts)
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Target User (जिसको data मिलेगा)</Label>
+                    <Select value={transferToUser} onValueChange={setTransferToUser}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Target user select करें" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {users.filter((u) => u.id !== transferFromUser).map((u) => (
+                          <SelectItem key={u.id} value={u.id}>
+                            {u.full_name || u.email} ({u.receipt_count} receipts)
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  {transferFromUser && transferToUser && (
+                    <div className="rounded-md border border-destructive/50 bg-destructive/10 p-3 text-sm">
+                      <p className="font-medium text-destructive">⚠️ Warning</p>
+                      <p className="text-muted-foreground">
+                        <strong>{users.find(u => u.id === transferFromUser)?.full_name || users.find(u => u.id === transferFromUser)?.email}</strong> का सारा data{" "}
+                        <strong>{users.find(u => u.id === transferToUser)?.full_name || users.find(u => u.id === transferToUser)?.email}</strong> को transfer होगा।
+                      </p>
+                    </div>
+                  )}
+                  <Button
+                    onClick={handleTransferData}
+                    disabled={!transferFromUser || !transferToUser || transferring}
+                    className="w-full"
+                  >
+                    <ArrowRightLeft className="mr-2 h-4 w-4" />
+                    {transferring ? "Transferring..." : "Transfer Data"}
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
           </TabsContent>
 
           <TabsContent value="templates">
