@@ -27,6 +27,15 @@ interface Receipt {
   tax_amount: number;
   total_amount: number;
   created_at: string;
+  template_id: string | null;
+}
+
+interface TemplateCustomText {
+  custom_text: string | null;
+  custom_text_left: string | null;
+  custom_text_top: string | null;
+  custom_text_color: string | null;
+  custom_text_font_size: string | null;
 }
 
 const ReceiptDisplay = () => {
@@ -34,6 +43,7 @@ const ReceiptDisplay = () => {
   const navigate = useNavigate();
   const [receipt, setReceipt] = useState<Receipt | null>(null);
   const [loading, setLoading] = useState(true);
+  const [customText, setCustomText] = useState<TemplateCustomText | null>(null);
 
   useEffect(() => {
     fetchReceipt();
