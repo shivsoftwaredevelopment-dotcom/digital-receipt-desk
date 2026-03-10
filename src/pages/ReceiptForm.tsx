@@ -151,18 +151,7 @@ const ReceiptForm = () => {
           subtotal: calculateSubtotal(),
           tax_amount: calculateTax(),
           total_amount: calculateTotal(),
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
-
-      // Auto-save contact details
-      await supabase
-        .from("contacts")
-        .upsert(
-          {
-            user_id: user.id,
+          template_id: selectedTemplate || null,
             customer_name: validated.customerName,
             mobile_number: validated.mobileNumber,
           },
