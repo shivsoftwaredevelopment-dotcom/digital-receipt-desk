@@ -370,6 +370,11 @@ const Admin = () => {
         body_text_color: newTemplate.body_text_color || "#000000",
         accent_color: newTemplate.accent_color || "#3b82f6",
         font_family: newTemplate.font_family || "Arial",
+        custom_text: newTemplate.custom_text || "",
+        custom_text_left: (newTemplate.custom_text_left || "50") + "%",
+        custom_text_top: (newTemplate.custom_text_top || "50") + "%",
+        custom_text_color: newTemplate.custom_text_color || "#000000",
+        custom_text_font_size: (newTemplate.custom_text_font_size || "14") + "px",
       };
 
       const { error } = await supabase
