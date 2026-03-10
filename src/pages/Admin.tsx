@@ -922,109 +922,18 @@ const Admin = () => {
                   <CardTitle>Create New Template</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="grid gap-4 md:grid-cols-2">
-                    <div>
-                      <Label htmlFor="templateName">Template Name</Label>
-                      <Input
-                        id="templateName"
-                        value={newTemplate.name}
-                        onChange={(e) => setNewTemplate({ ...newTemplate, name: e.target.value })}
-                        placeholder="Enter template name"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="fontFamily">Font Family</Label>
-                      <Input
-                        id="fontFamily"
-                        value={newTemplate.font_family}
-                        onChange={(e) => setNewTemplate({ ...newTemplate, font_family: e.target.value })}
-                        placeholder="Arial"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="headerBg">Header Background</Label>
-                      <div className="flex gap-2">
-                        <Input
-                          id="headerBg"
-                          type="color"
-                          value={newTemplate.header_bg_color}
-                          onChange={(e) => setNewTemplate({ ...newTemplate, header_bg_color: e.target.value })}
-                          className="w-16"
-                        />
-                        <Input
-                          value={newTemplate.header_bg_color}
-                          onChange={(e) => setNewTemplate({ ...newTemplate, header_bg_color: e.target.value })}
-                        />
-                      </div>
-                    </div>
-                    <div>
-                      <Label htmlFor="headerText">Header Text</Label>
-                      <div className="flex gap-2">
-                        <Input
-                          id="headerText"
-                          type="color"
-                          value={newTemplate.header_text_color}
-                          onChange={(e) => setNewTemplate({ ...newTemplate, header_text_color: e.target.value })}
-                          className="w-16"
-                        />
-                        <Input
-                          value={newTemplate.header_text_color}
-                          onChange={(e) => setNewTemplate({ ...newTemplate, header_text_color: e.target.value })}
-                        />
-                      </div>
-                    </div>
-                    <div>
-                      <Label htmlFor="bodyBg">Body Background</Label>
-                      <div className="flex gap-2">
-                        <Input
-                          id="bodyBg"
-                          type="color"
-                          value={newTemplate.body_bg_color}
-                          onChange={(e) => setNewTemplate({ ...newTemplate, body_bg_color: e.target.value })}
-                          className="w-16"
-                        />
-                        <Input
-                          value={newTemplate.body_bg_color}
-                          onChange={(e) => setNewTemplate({ ...newTemplate, body_bg_color: e.target.value })}
-                        />
-                      </div>
-                    </div>
-                    <div>
-                      <Label htmlFor="bodyText">Body Text</Label>
-                      <div className="flex gap-2">
-                        <Input
-                          id="bodyText"
-                          type="color"
-                          value={newTemplate.body_text_color}
-                          onChange={(e) => setNewTemplate({ ...newTemplate, body_text_color: e.target.value })}
-                          className="w-16"
-                        />
-                        <Input
-                          value={newTemplate.body_text_color}
-                          onChange={(e) => setNewTemplate({ ...newTemplate, body_text_color: e.target.value })}
-                        />
-                      </div>
-                    </div>
-                    <div>
-                      <Label htmlFor="accent">Accent Color</Label>
-                      <div className="flex gap-2">
-                        <Input
-                          id="accent"
-                          type="color"
-                          value={newTemplate.accent_color}
-                          onChange={(e) => setNewTemplate({ ...newTemplate, accent_color: e.target.value })}
-                          className="w-16"
-                        />
-                        <Input
-                          value={newTemplate.accent_color}
-                          onChange={(e) => setNewTemplate({ ...newTemplate, accent_color: e.target.value })}
-                        />
-                      </div>
-                    </div>
+                  <div>
+                    <Label htmlFor="templateName">Template Name *</Label>
+                    <Input
+                      id="templateName"
+                      value={newTemplate.name}
+                      onChange={(e) => setNewTemplate({ ...newTemplate, name: e.target.value })}
+                      placeholder="Enter template name"
+                    />
                   </div>
 
-                  {/* Custom Text Section */}
-                  <div className="border-t pt-4 mt-4">
+                  {/* Custom Text Overlay Section */}
+                  <div>
                     <h3 className="font-semibold mb-3 text-foreground">Custom Text Overlay (Receipt)</h3>
                     <div className="grid gap-4 md:grid-cols-2">
                       <div className="md:col-span-2">
@@ -1131,18 +1040,27 @@ const Admin = () => {
                       <div key={template.id} className="flex items-center justify-between rounded-lg border p-4">
                         <div className="flex-1">
                           <h3 className="font-semibold">{template.name}</h3>
-                          <div className="mt-2 flex gap-2">
-                            <div className="flex items-center gap-1">
-                              <div className="h-6 w-6 rounded border" style={{ backgroundColor: template.header_bg_color }} />
-                              <div className="h-6 w-6 rounded border" style={{ backgroundColor: template.body_bg_color }} />
-                              <div className="h-6 w-6 rounded border" style={{ backgroundColor: template.accent_color }} />
-                            </div>
-                            <span className="text-sm text-muted-foreground">{template.font_family}</span>
-                          </div>
                           {template.custom_text && (
-                            <div className="mt-2 text-xs text-muted-foreground">
-                              Custom: "<span className="font-medium" style={{ color: template.custom_text_color }}>{template.custom_text}</span>" 
+                            <div className="mt-2 text-sm text-muted-foreground">
+                              Text: "<span className="font-medium" style={{ color: template.custom_text_color }}>{template.custom_text}</span>" 
                               — Left: {template.custom_text_left}, Top: {template.custom_text_top}, Size: {template.custom_text_font_size}
+                            </div>
+                          )}
+                          {/* Preview */}
+                          {template.custom_text && (
+                            <div className="relative mt-2 rounded border border-dashed border-muted-foreground/30 bg-muted/10" style={{ width: '100%', height: '120px' }}>
+                              <span
+                                className="absolute font-semibold whitespace-nowrap"
+                                style={{
+                                  left: template.custom_text_left || '50%',
+                                  top: template.custom_text_top || '50%',
+                                  color: template.custom_text_color || '#000',
+                                  fontSize: template.custom_text_font_size || '14px',
+                                  transform: 'translate(-50%, -50%)',
+                                }}
+                              >
+                                {template.custom_text}
+                              </span>
                             </div>
                           )}
                         </div>

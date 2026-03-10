@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -61,6 +61,19 @@ const ReceiptForm = () => {
   const [loading, setLoading] = useState(false);
   const [showItems, setShowItems] = useState(true);
   const [showSummary, setShowSummary] = useState(true);
+  const [templates, setTemplates] = useState<{ id: string; name: string; custom_text: string }[]>([]);
+  const [selectedTemplate, setSelectedTemplate] = useState<string>("");
+
+  useEffect(() => {
+    const fetchTemplates = async () => {
+      const { data } = await supabase
+        .from("receipt_templates")
+        .select("id, name, custom_text")
+        .order("created_at", { ascending: false });
+      if (data) setTemplates(data);
+    };
+    fetchTemplates();
+  }, []);
 
   const addItem = () => {
     setItems([...items, { id: Date.now().toString(), name: "", quantity: 1, price: 0 }]);
@@ -138,6 +151,7 @@ const ReceiptForm = () => {
           subtotal: calculateSubtotal(),
           tax_amount: calculateTax(),
           total_amount: calculateTotal(),
+          template_id: selectedTemplate && selectedTemplate !== "none" ? selectedTemplate : null,
         })
         .select()
         .single();
@@ -306,8 +320,24 @@ const ReceiptForm = () => {
                     onChange={(e) => setDate(e.target.value)}
                     required
                   />
-                </div>
               </div>
+              <div className="space-y-2">
+                <Label htmlFor="template">Template</Label>
+                <Select value={selectedTemplate} onValueChange={setSelectedTemplate}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="No template (default)" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">No template</SelectItem>
+                    {templates.map((t) => (
+                      <SelectItem key={t.id} value={t.id}>
+                        {t.name} {t.custom_text ? `- "${t.custom_text}"` : ""}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
             </CardContent>
           </Card>
 
