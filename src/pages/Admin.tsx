@@ -1139,6 +1139,12 @@ const Admin = () => {
                             </div>
                             <span className="text-sm text-muted-foreground">{template.font_family}</span>
                           </div>
+                          {template.custom_text && (
+                            <div className="mt-2 text-xs text-muted-foreground">
+                              Custom: "<span className="font-medium" style={{ color: template.custom_text_color }}>{template.custom_text}</span>" 
+                              — Left: {template.custom_text_left}, Top: {template.custom_text_top}, Size: {template.custom_text_font_size}
+                            </div>
+                          )}
                         </div>
                         {!template.is_default && (
                           <Button
