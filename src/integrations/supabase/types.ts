@@ -77,6 +77,11 @@ export type Database = {
           body_bg_color: string | null
           body_text_color: string | null
           created_at: string | null
+          custom_text: string | null
+          custom_text_color: string | null
+          custom_text_font_size: string | null
+          custom_text_left: string | null
+          custom_text_top: string | null
           font_family: string | null
           header_bg_color: string | null
           header_text_color: string | null
@@ -90,6 +95,11 @@ export type Database = {
           body_bg_color?: string | null
           body_text_color?: string | null
           created_at?: string | null
+          custom_text?: string | null
+          custom_text_color?: string | null
+          custom_text_font_size?: string | null
+          custom_text_left?: string | null
+          custom_text_top?: string | null
           font_family?: string | null
           header_bg_color?: string | null
           header_text_color?: string | null
@@ -103,6 +113,11 @@ export type Database = {
           body_bg_color?: string | null
           body_text_color?: string | null
           created_at?: string | null
+          custom_text?: string | null
+          custom_text_color?: string | null
+          custom_text_font_size?: string | null
+          custom_text_left?: string | null
+          custom_text_top?: string | null
           font_family?: string | null
           header_bg_color?: string | null
           header_text_color?: string | null
