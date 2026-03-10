@@ -308,9 +308,24 @@ const ReceiptForm = () => {
                     onChange={(e) => setDate(e.target.value)}
                     required
                   />
-                </div>
               </div>
-            </CardContent>
+              <div className="space-y-2">
+                <Label htmlFor="template">Template</Label>
+                <Select value={selectedTemplate} onValueChange={setSelectedTemplate}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="No template (default)" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">No template</SelectItem>
+                    {templates.map((t) => (
+                      <SelectItem key={t.id} value={t.id}>
+                        {t.name} {t.custom_text ? `- "${t.custom_text}"` : ""}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
           </Card>
 
           <Card className="mb-6 shadow-medium">
