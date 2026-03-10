@@ -326,6 +326,7 @@ const ReceiptForm = () => {
                 </Select>
               </div>
             </div>
+            </CardContent>
           </Card>
 
           <Card className="mb-6 shadow-medium">
