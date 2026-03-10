@@ -58,7 +58,18 @@ const ReceiptDisplay = () => {
         .single();
 
       if (error) throw error;
-      setReceipt(data as unknown as Receipt);
+      const receiptData = data as unknown as Receipt;
+      setReceipt(receiptData);
+
+      // Fetch custom text from template if template_id exists
+      if (receiptData.template_id) {
+        const { data: tplData } = await supabase
+          .from("receipt_templates")
+          .select("custom_text, custom_text_left, custom_text_top, custom_text_color, custom_text_font_size")
+          .eq("id", receiptData.template_id)
+          .single();
+        if (tplData) setCustomText(tplData as TemplateCustomText);
+      }
     } catch (error) {
       toast.error("Failed to load receipt");
       navigate("/");
