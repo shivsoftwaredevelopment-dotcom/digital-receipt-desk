@@ -190,6 +190,21 @@ const ReceiptDisplay = () => {
               ))}
             </div>
 
+            {/* Custom Text from Template */}
+            {customText?.custom_text && (
+              <div
+                className="absolute font-semibold"
+                style={{
+                  left: customText.custom_text_left || '50%',
+                  top: customText.custom_text_top || '50%',
+                  color: customText.custom_text_color || '#000',
+                  fontSize: customText.custom_text_font_size || '14px',
+                }}
+              >
+                {customText.custom_text}
+              </div>
+            )}
+
             {/* Subtotal, Tax, Total */}
           </div>
         </div>
