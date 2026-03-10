@@ -27,6 +27,15 @@ interface Receipt {
   tax_amount: number;
   total_amount: number;
   created_at: string;
+  template_id: string | null;
+}
+
+interface TemplateCustomText {
+  custom_text: string | null;
+  custom_text_left: string | null;
+  custom_text_top: string | null;
+  custom_text_color: string | null;
+  custom_text_font_size: string | null;
 }
 
 const ReceiptDisplay = () => {
@@ -34,6 +43,7 @@ const ReceiptDisplay = () => {
   const navigate = useNavigate();
   const [receipt, setReceipt] = useState<Receipt | null>(null);
   const [loading, setLoading] = useState(true);
+  const [customText, setCustomText] = useState<TemplateCustomText | null>(null);
 
   useEffect(() => {
     fetchReceipt();
@@ -48,7 +58,18 @@ const ReceiptDisplay = () => {
         .single();
 
       if (error) throw error;
-      setReceipt(data as unknown as Receipt);
+      const receiptData = data as unknown as Receipt;
+      setReceipt(receiptData);
+
+      // Fetch custom text from template if template_id exists
+      if (receiptData.template_id) {
+        const { data: tplData } = await supabase
+          .from("receipt_templates")
+          .select("custom_text, custom_text_left, custom_text_top, custom_text_color, custom_text_font_size")
+          .eq("id", receiptData.template_id)
+          .single();
+        if (tplData) setCustomText(tplData as TemplateCustomText);
+      }
     } catch (error) {
       toast.error("Failed to load receipt");
       navigate("/");
@@ -168,6 +189,21 @@ const ReceiptDisplay = () => {
                 </div>
               ))}
             </div>
+
+            {/* Custom Text from Template */}
+            {customText?.custom_text && (
+              <div
+                className="absolute font-semibold"
+                style={{
+                  left: customText.custom_text_left || '50%',
+                  top: customText.custom_text_top || '50%',
+                  color: customText.custom_text_color || '#000',
+                  fontSize: customText.custom_text_font_size || '14px',
+                }}
+              >
+                {customText.custom_text}
+              </div>
+            )}
 
             {/* Subtotal, Tax, Total */}
           </div>

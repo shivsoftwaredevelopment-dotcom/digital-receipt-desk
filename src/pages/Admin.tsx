@@ -35,6 +35,11 @@ interface Template {
   accent_color: string;
   font_family: string;
   is_default: boolean;
+  custom_text: string;
+  custom_text_left: string;
+  custom_text_top: string;
+  custom_text_color: string;
+  custom_text_font_size: string;
 }
 
 const Admin = () => {
@@ -51,6 +56,11 @@ const Admin = () => {
     body_text_color: "#000000",
     accent_color: "#3b82f6",
     font_family: "Arial",
+    custom_text: "",
+    custom_text_left: "50",
+    custom_text_top: "50",
+    custom_text_color: "#000000",
+    custom_text_font_size: "14",
   });
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [editEmail, setEditEmail] = useState("");
@@ -360,6 +370,11 @@ const Admin = () => {
         body_text_color: newTemplate.body_text_color || "#000000",
         accent_color: newTemplate.accent_color || "#3b82f6",
         font_family: newTemplate.font_family || "Arial",
+        custom_text: newTemplate.custom_text || "",
+        custom_text_left: (newTemplate.custom_text_left || "50") + "%",
+        custom_text_top: (newTemplate.custom_text_top || "50") + "%",
+        custom_text_color: newTemplate.custom_text_color || "#000000",
+        custom_text_font_size: (newTemplate.custom_text_font_size || "14") + "px",
       };
 
       const { error } = await supabase
@@ -377,6 +392,11 @@ const Admin = () => {
         body_text_color: "#000000",
         accent_color: "#3b82f6",
         font_family: "Arial",
+        custom_text: "",
+        custom_text_left: "50",
+        custom_text_top: "50",
+        custom_text_color: "#000000",
+        custom_text_font_size: "14",
       });
     } catch (error: any) {
       toast.error(error.message);
@@ -1002,6 +1022,98 @@ const Admin = () => {
                       </div>
                     </div>
                   </div>
+
+                  {/* Custom Text Section */}
+                  <div className="border-t pt-4 mt-4">
+                    <h3 className="font-semibold mb-3 text-foreground">Custom Text Overlay (Receipt)</h3>
+                    <div className="grid gap-4 md:grid-cols-2">
+                      <div className="md:col-span-2">
+                        <Label htmlFor="customText">Custom Text</Label>
+                        <Input
+                          id="customText"
+                          value={newTemplate.custom_text}
+                          onChange={(e) => setNewTemplate({ ...newTemplate, custom_text: e.target.value })}
+                          placeholder="Enter custom text to show on receipt"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="customLeft">Left Position (%)</Label>
+                        <Input
+                          id="customLeft"
+                          type="number"
+                          min="0"
+                          max="100"
+                          value={newTemplate.custom_text_left}
+                          onChange={(e) => setNewTemplate({ ...newTemplate, custom_text_left: e.target.value })}
+                          placeholder="50"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="customTop">Top Position (%)</Label>
+                        <Input
+                          id="customTop"
+                          type="number"
+                          min="0"
+                          max="100"
+                          value={newTemplate.custom_text_top}
+                          onChange={(e) => setNewTemplate({ ...newTemplate, custom_text_top: e.target.value })}
+                          placeholder="50"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="customColor">Text Color</Label>
+                        <div className="flex gap-2">
+                          <Input
+                            id="customColor"
+                            type="color"
+                            value={newTemplate.custom_text_color}
+                            onChange={(e) => setNewTemplate({ ...newTemplate, custom_text_color: e.target.value })}
+                            className="w-16"
+                          />
+                          <Input
+                            value={newTemplate.custom_text_color}
+                            onChange={(e) => setNewTemplate({ ...newTemplate, custom_text_color: e.target.value })}
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <Label htmlFor="customFontSize">Font Size (px)</Label>
+                        <Input
+                          id="customFontSize"
+                          type="number"
+                          min="8"
+                          max="72"
+                          value={newTemplate.custom_text_font_size}
+                          onChange={(e) => setNewTemplate({ ...newTemplate, custom_text_font_size: e.target.value })}
+                          placeholder="14"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Live Preview Box */}
+                    {newTemplate.custom_text && (
+                      <div className="mt-4">
+                        <Label>Preview</Label>
+                        <div
+                          className="relative mt-2 rounded-lg border-2 border-dashed border-muted-foreground/30 bg-muted/20"
+                          style={{ width: '100%', height: '200px' }}
+                        >
+                          <span
+                            className="absolute font-semibold whitespace-nowrap"
+                            style={{
+                              left: `${newTemplate.custom_text_left || 50}%`,
+                              top: `${newTemplate.custom_text_top || 50}%`,
+                              color: newTemplate.custom_text_color || '#000000',
+                              fontSize: `${newTemplate.custom_text_font_size || 14}px`,
+                              transform: 'translate(-50%, -50%)',
+                            }}
+                          >
+                            {newTemplate.custom_text}
+                          </span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                   <Button onClick={handleCreateTemplate}>
                     <Save className="mr-2 h-4 w-4" />
                     Create Template
@@ -1027,6 +1139,12 @@ const Admin = () => {
                             </div>
                             <span className="text-sm text-muted-foreground">{template.font_family}</span>
                           </div>
+                          {template.custom_text && (
+                            <div className="mt-2 text-xs text-muted-foreground">
+                              Custom: "<span className="font-medium" style={{ color: template.custom_text_color }}>{template.custom_text}</span>" 
+                              — Left: {template.custom_text_left}, Top: {template.custom_text_top}, Size: {template.custom_text_font_size}
+                            </div>
+                          )}
                         </div>
                         {!template.is_default && (
                           <Button
