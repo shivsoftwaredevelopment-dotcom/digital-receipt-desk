@@ -61,6 +61,19 @@ const ReceiptForm = () => {
   const [loading, setLoading] = useState(false);
   const [showItems, setShowItems] = useState(true);
   const [showSummary, setShowSummary] = useState(true);
+  const [templates, setTemplates] = useState<{ id: string; name: string; custom_text: string }[]>([]);
+  const [selectedTemplate, setSelectedTemplate] = useState<string>("");
+
+  useEffect(() => {
+    const fetchTemplates = async () => {
+      const { data } = await supabase
+        .from("receipt_templates")
+        .select("id, name, custom_text")
+        .order("created_at", { ascending: false });
+      if (data) setTemplates(data);
+    };
+    fetchTemplates();
+  }, []);
 
   const addItem = () => {
     setItems([...items, { id: Date.now().toString(), name: "", quantity: 1, price: 0 }]);
