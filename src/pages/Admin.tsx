@@ -1040,18 +1040,27 @@ const Admin = () => {
                       <div key={template.id} className="flex items-center justify-between rounded-lg border p-4">
                         <div className="flex-1">
                           <h3 className="font-semibold">{template.name}</h3>
-                          <div className="mt-2 flex gap-2">
-                            <div className="flex items-center gap-1">
-                              <div className="h-6 w-6 rounded border" style={{ backgroundColor: template.header_bg_color }} />
-                              <div className="h-6 w-6 rounded border" style={{ backgroundColor: template.body_bg_color }} />
-                              <div className="h-6 w-6 rounded border" style={{ backgroundColor: template.accent_color }} />
-                            </div>
-                            <span className="text-sm text-muted-foreground">{template.font_family}</span>
-                          </div>
                           {template.custom_text && (
-                            <div className="mt-2 text-xs text-muted-foreground">
-                              Custom: "<span className="font-medium" style={{ color: template.custom_text_color }}>{template.custom_text}</span>" 
+                            <div className="mt-2 text-sm text-muted-foreground">
+                              Text: "<span className="font-medium" style={{ color: template.custom_text_color }}>{template.custom_text}</span>" 
                               — Left: {template.custom_text_left}, Top: {template.custom_text_top}, Size: {template.custom_text_font_size}
+                            </div>
+                          )}
+                          {/* Preview */}
+                          {template.custom_text && (
+                            <div className="relative mt-2 rounded border border-dashed border-muted-foreground/30 bg-muted/10" style={{ width: '100%', height: '120px' }}>
+                              <span
+                                className="absolute font-semibold whitespace-nowrap"
+                                style={{
+                                  left: template.custom_text_left || '50%',
+                                  top: template.custom_text_top || '50%',
+                                  color: template.custom_text_color || '#000',
+                                  fontSize: template.custom_text_font_size || '14px',
+                                  transform: 'translate(-50%, -50%)',
+                                }}
+                              >
+                                {template.custom_text}
+                              </span>
                             </div>
                           )}
                         </div>
