@@ -1113,6 +1113,7 @@ const Admin = () => {
                         </div>
                       </div>
                     )}
+                  </div>
                   <Button onClick={handleCreateTemplate}>
                     <Save className="mr-2 h-4 w-4" />
                     Create Template
