@@ -35,6 +35,11 @@ interface Template {
   accent_color: string;
   font_family: string;
   is_default: boolean;
+  custom_text: string;
+  custom_text_left: string;
+  custom_text_top: string;
+  custom_text_color: string;
+  custom_text_font_size: string;
 }
 
 const Admin = () => {
