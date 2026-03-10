@@ -392,6 +392,11 @@ const Admin = () => {
         body_text_color: "#000000",
         accent_color: "#3b82f6",
         font_family: "Arial",
+        custom_text: "",
+        custom_text_left: "50",
+        custom_text_top: "50",
+        custom_text_color: "#000000",
+        custom_text_font_size: "14",
       });
     } catch (error: any) {
       toast.error(error.message);
