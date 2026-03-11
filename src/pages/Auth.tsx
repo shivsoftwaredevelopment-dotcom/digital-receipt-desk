@@ -28,6 +28,15 @@ const Auth = () => {
 
   useEffect(() => {
     setMounted(true);
+    // Check maintenance mode
+    supabase
+      .from("site_settings")
+      .select("value")
+      .eq("key", "maintenance_mode")
+      .maybeSingle()
+      .then(({ data }) => {
+        setMaintenanceMode(data?.value === "true");
+      });
   }, []);
 
   useEffect(() => {
