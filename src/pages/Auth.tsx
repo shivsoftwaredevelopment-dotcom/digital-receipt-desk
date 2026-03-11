@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import { Receipt, Mail, Lock, ShieldCheck, ArrowLeft, Sparkles } from "lucide-react";
+import Maintenance from "@/pages/Maintenance";
 import { z } from "zod";
 
 const authSchema = z.object({
@@ -23,9 +24,19 @@ const Auth = () => {
   const [password, setPassword] = useState("");
   const [mode, setMode] = useState<AuthMode>("signin");
   const [mounted, setMounted] = useState(false);
+  const [maintenanceMode, setMaintenanceMode] = useState<boolean | null>(null);
 
   useEffect(() => {
     setMounted(true);
+    // Check maintenance mode
+    supabase
+      .from("site_settings")
+      .select("value")
+      .eq("key", "maintenance_mode")
+      .maybeSingle()
+      .then(({ data }) => {
+        setMaintenanceMode(data?.value === "true");
+      });
   }, []);
 
   useEffect(() => {
@@ -112,6 +123,18 @@ const Auth = () => {
     signup: "Get started with your receipt management",
     admin: "Restricted area — admin credentials required",
   };
+  // Show maintenance page for non-admin login attempts
+  if (maintenanceMode === null) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+      </div>
+    );
+  }
+
+  if (maintenanceMode && mode !== "admin") {
+    return <Maintenance />;
+  }
 
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-background p-4">
