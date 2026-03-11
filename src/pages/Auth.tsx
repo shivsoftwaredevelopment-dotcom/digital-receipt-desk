@@ -123,6 +123,18 @@ const Auth = () => {
     signup: "Get started with your receipt management",
     admin: "Restricted area — admin credentials required",
   };
+  // Show maintenance page for non-admin login attempts
+  if (maintenanceMode === null) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+      </div>
+    );
+  }
+
+  if (maintenanceMode && mode !== "admin") {
+    return <Maintenance />;
+  }
 
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-background p-4">
