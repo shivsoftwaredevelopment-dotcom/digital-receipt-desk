@@ -24,6 +24,7 @@ const Auth = () => {
   const [password, setPassword] = useState("");
   const [mode, setMode] = useState<AuthMode>("signin");
   const [mounted, setMounted] = useState(false);
+  const [maintenanceMode, setMaintenanceMode] = useState<boolean | null>(null);
 
   useEffect(() => {
     setMounted(true);
