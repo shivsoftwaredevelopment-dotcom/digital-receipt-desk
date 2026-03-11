@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import { Receipt, Mail, Lock, ShieldCheck, ArrowLeft, Sparkles } from "lucide-react";
+import Maintenance from "@/pages/Maintenance";
 import { z } from "zod";
 
 const authSchema = z.object({
