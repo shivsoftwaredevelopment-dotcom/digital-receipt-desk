@@ -462,6 +462,17 @@ const Admin = () => {
           </div>
           <div className="flex items-center gap-2">
             <div className="flex items-center gap-2 rounded-md border border-input px-3 py-2">
+              <Users className="h-4 w-4 text-muted-foreground" />
+              <Label htmlFor="registration-toggle" className="text-sm cursor-pointer">
+                Registration
+              </Label>
+              <Switch
+                id="registration-toggle"
+                checked={registrationEnabled}
+                onCheckedChange={toggleRegistration}
+              />
+            </div>
+            <div className="flex items-center gap-2 rounded-md border border-input px-3 py-2">
               <Wrench className="h-4 w-4 text-muted-foreground" />
               <Label htmlFor="maintenance-toggle" className="text-sm cursor-pointer">
                 Maintenance
