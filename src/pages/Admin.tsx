@@ -73,6 +73,7 @@ const Admin = () => {
   const [transferToUser, setTransferToUser] = useState<string>("");
   const [transferring, setTransferring] = useState(false);
   const [maintenanceMode, setMaintenanceMode] = useState(false);
+  const [registrationEnabled, setRegistrationEnabled] = useState(true);
   const [resettingData, setResettingData] = useState(false);
   const [resetDialogOpen, setResetDialogOpen] = useState(false);
   const [resetTarget, setResetTarget] = useState<string>("all");
