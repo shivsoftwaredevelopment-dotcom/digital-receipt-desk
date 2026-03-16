@@ -108,7 +108,7 @@ const Admin = () => {
       }
 
       setIsAdmin(true);
-      await Promise.all([fetchUsers(), fetchTemplates(), fetchMaintenanceMode()]);
+      await Promise.all([fetchUsers(), fetchTemplates(), fetchMaintenanceMode(), fetchRegistrationEnabled()]);
     } catch (error: any) {
       toast.error(error.message);
     } finally {
