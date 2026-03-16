@@ -73,6 +73,7 @@ const Admin = () => {
   const [transferToUser, setTransferToUser] = useState<string>("");
   const [transferring, setTransferring] = useState(false);
   const [maintenanceMode, setMaintenanceMode] = useState(false);
+  const [registrationEnabled, setRegistrationEnabled] = useState(true);
   const [resettingData, setResettingData] = useState(false);
   const [resetDialogOpen, setResetDialogOpen] = useState(false);
   const [resetTarget, setResetTarget] = useState<string>("all");
@@ -107,7 +108,7 @@ const Admin = () => {
       }
 
       setIsAdmin(true);
-      await Promise.all([fetchUsers(), fetchTemplates(), fetchMaintenanceMode()]);
+      await Promise.all([fetchUsers(), fetchTemplates(), fetchMaintenanceMode(), fetchRegistrationEnabled()]);
     } catch (error: any) {
       toast.error(error.message);
     } finally {
@@ -355,6 +356,29 @@ const Admin = () => {
     }
   };
 
+  const fetchRegistrationEnabled = async () => {
+    const { data } = await supabase
+      .from("site_settings")
+      .select("value")
+      .eq("key", "registration_enabled")
+      .maybeSingle();
+    setRegistrationEnabled(data?.value !== "false");
+  };
+
+  const toggleRegistration = async () => {
+    const newValue = !registrationEnabled;
+    try {
+      const { error } = await supabase
+        .from("site_settings")
+        .upsert({ key: "registration_enabled", value: String(newValue), updated_at: new Date().toISOString() }, { onConflict: "key" });
+      if (error) throw error;
+      setRegistrationEnabled(newValue);
+      toast.success(newValue ? "Public registration enabled" : "Public registration disabled");
+    } catch (error: any) {
+      toast.error(error.message);
+    }
+  };
+
   const handleCreateTemplate = async () => {
     if (!newTemplate.name) {
       toast.error("Template name is required");
@@ -437,6 +461,17 @@ const Admin = () => {
             <h1 className="text-3xl font-bold text-primary">Admin Panel</h1>
           </div>
           <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 rounded-md border border-input px-3 py-2">
+              <Users className="h-4 w-4 text-muted-foreground" />
+              <Label htmlFor="registration-toggle" className="text-sm cursor-pointer">
+                Registration
+              </Label>
+              <Switch
+                id="registration-toggle"
+                checked={registrationEnabled}
+                onCheckedChange={toggleRegistration}
+              />
+            </div>
             <div className="flex items-center gap-2 rounded-md border border-input px-3 py-2">
               <Wrench className="h-4 w-4 text-muted-foreground" />
               <Label htmlFor="maintenance-toggle" className="text-sm cursor-pointer">
