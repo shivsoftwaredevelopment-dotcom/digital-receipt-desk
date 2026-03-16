@@ -287,13 +287,15 @@ const Auth = () => {
 
               {mode === "signin" && (
                 <div className="flex flex-col gap-2">
-                  <Button
-                    variant="outline"
-                    className="w-full transition-all duration-200 hover:shadow-soft"
-                    onClick={() => switchMode("signup")}
-                  >
-                    Create new account
-                  </Button>
+                  {registrationEnabled && (
+                    <Button
+                      variant="outline"
+                      className="w-full transition-all duration-200 hover:shadow-soft"
+                      onClick={() => switchMode("signup")}
+                    >
+                      Create new account
+                    </Button>
+                  )}
                   <Button
                     variant="ghost"
                     size="sm"
