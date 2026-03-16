@@ -356,6 +356,29 @@ const Admin = () => {
     }
   };
 
+  const fetchRegistrationEnabled = async () => {
+    const { data } = await supabase
+      .from("site_settings")
+      .select("value")
+      .eq("key", "registration_enabled")
+      .maybeSingle();
+    setRegistrationEnabled(data?.value !== "false");
+  };
+
+  const toggleRegistration = async () => {
+    const newValue = !registrationEnabled;
+    try {
+      const { error } = await supabase
+        .from("site_settings")
+        .upsert({ key: "registration_enabled", value: String(newValue), updated_at: new Date().toISOString() }, { onConflict: "key" });
+      if (error) throw error;
+      setRegistrationEnabled(newValue);
+      toast.success(newValue ? "Public registration enabled" : "Public registration disabled");
+    } catch (error: any) {
+      toast.error(error.message);
+    }
+  };
+
   const handleCreateTemplate = async () => {
     if (!newTemplate.name) {
       toast.error("Template name is required");
