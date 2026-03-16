@@ -25,18 +25,18 @@ const Auth = () => {
   const [mode, setMode] = useState<AuthMode>("signin");
   const [mounted, setMounted] = useState(false);
   const [maintenanceMode, setMaintenanceMode] = useState<boolean | null>(null);
+  const [registrationEnabled, setRegistrationEnabled] = useState(true);
 
   useEffect(() => {
     setMounted(true);
-    // Check maintenance mode
-    supabase
-      .from("site_settings")
-      .select("value")
-      .eq("key", "maintenance_mode")
-      .maybeSingle()
-      .then(({ data }) => {
-        setMaintenanceMode(data?.value === "true");
-      });
+    // Check maintenance mode and registration setting
+    Promise.all([
+      supabase.from("site_settings").select("value").eq("key", "maintenance_mode").maybeSingle(),
+      supabase.from("site_settings").select("value").eq("key", "registration_enabled").maybeSingle(),
+    ]).then(([maintRes, regRes]) => {
+      setMaintenanceMode(maintRes.data?.value === "true");
+      setRegistrationEnabled(regRes.data?.value !== "false");
+    });
   }, []);
 
   useEffect(() => {
